@@ -97,6 +97,7 @@
         
         const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
+        // FIXED: Renamed function here to explicitly match your button action listeners!
         function startRaceSimulation(chosenColor) {
             document.getElementById('menu-overlay').style.display = 'none';
             init(chosenColor);
@@ -108,7 +109,7 @@
             
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x02020c);
-            scene.fog = new THREE.FogExp2(0x02020c, 0.003); // Lighter fog for cleaner depth visibility
+            scene.fog = new THREE.FogExp2(0x02020c, 0.003);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             clock = new THREE.Clock();
@@ -118,7 +119,6 @@
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            // Boosted Ambient Light to lift structural tracking outlines slightly
             const ambient = new THREE.AmbientLight(0x151c33, 0.8);
             scene.add(ambient);
 
@@ -135,7 +135,7 @@
         }
 
         function buildSceneryAndTrack() {
-            // Starfield Vector Space
+            // Starfield
             const starGeo = new THREE.BufferGeometry();
             const starCoords = [];
             for(let i=0; i<400; i++) {
@@ -145,12 +145,12 @@
             const starfield = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 }));
             scene.add(starfield);
 
-            // 1. Drivable Track Asphalt with custom emmissive glow metrics to assist eyes
+            // 1. Drivable Track Asphalt
             const trackGeo = new THREE.TubeGeometry(trackCurve, 300, trackWidth / 2, 10, true);
             const trackMat = new THREE.MeshStandardMaterial({ 
                 color: 0x181a22, 
                 roughness: 0.8,
-                emissive: 0x050818 // Subtle self-illuminating grid hum
+                emissive: 0x050818
             });
             const trackMesh = new THREE.Mesh(trackGeo, trackMat);
             trackMesh.scale.set(1, 0.005, 1);
@@ -172,21 +172,19 @@
             }
             scene.add(checkeredGroup);
 
-            // 3. REARCHITECTED HIGH-INTENSITY STREET LIGHTS (INWARD OPTIMIZED FACING)
+            // 3. HIGH-INTENSITY STREET LIGHTS
             const poleGeo = new THREE.CylinderGeometry(0.18, 0.25, 10);
             const armGeo = new THREE.CylinderGeometry(0.12, 0.12, 4);
             armGeo.rotateZ(Math.PI / 2);
             const poleMat = new THREE.MeshStandardMaterial({ color: 0x2d3748, metalness: 0.6 });
             const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0xfff3cc });
 
-            // Increase node density to 24 fixtures across loop tracking matrices
             for (let i = 0; i < 24; i++) {
                 const t = i / 24;
                 const trackPt = trackCurve.getPointAt(t);
                 const tangent = trackCurve.getTangentAt(t);
                 const normal = tangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
                 
-                // Mount light pole baseline at outer track radius margin
                 const polePos = trackPt.clone().addScaledVector(normal, (trackWidth / 2) + 3);
                 polePos.y = 0;
 
@@ -200,23 +198,19 @@
                 const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), lightGlowMat);
                 bulb.position.set(-4, 9.8, 0);
 
-                // HIGH-POWER SPOTLIGHT CONE RIG (INWARD ANCHORED TARGETS)
                 const spot = new THREE.SpotLight(0xfff6cc, 8.0, 50, Math.PI / 3, 0.6, 0.8);
                 spot.position.set(-4, 9.8, 0);
                 
-                // Vector Force Target: Anchor spot look-at matrix strictly down to road centerline
                 spot.target.position.copy(trackPt);
                 scene.add(spot.target);
 
                 streetLight.add(pole, arm, bulb, spot);
                 streetLight.position.copy(polePos);
                 
-                // Orient framework structure so cross arm extends directly over track
                 streetLight.lookAt(trackPt); 
                 scene.add(streetLight);
             }
 
-            // 4. Track Obstacles Loader
             buildTrackObstacles();
         }
 
@@ -261,7 +255,7 @@
             });
         }
 
-        // --- STABLE VECTOR RACING RIG CONFIGURATION ---
+        // --- STABLE VECTOR RACING RIG ---
         class CustomRaceCar {
             constructor(color, isAI = false, label = "") {
                 this.isAI = isAI;
@@ -457,7 +451,7 @@
             }
         }
 
-        // --- WAYPOINT AI Logic ---
+        // --- WAYPOINT AI ---
         function runAIAutonomousLogic(car, dt) {
             let target = trackWaypoints[car.currentWaypointIndex];
             if (car.position.distanceTo(target) < 28) {
@@ -535,4 +529,55 @@
                     ctx.lineWidth = p.r;
                     ctx.strokeStyle = p.color;
                     ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
-                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+
+                    if (p.y > canvas.height) {
+                        confettiPieces[index] = p;
+                        p.y = -20;
+                        p.x = Math.random() * canvas.width;
+                    }
+                });
+                requestAnimationFrame(drawConfettiFrame);
+            }
+            drawConfettiFrame();
+        }
+
+        function handleWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const dt = Math.min(clock.getDelta(), 0.1);
+
+            const playerCommands = {
+                gas: activeInputs.Forward ? 1.0 : 0.0,
+                brake: activeInputs.Backward ? 1.0 : 0.0,
+                steer: (activeInputs.Left ? 1.0 : 0.0) - (activeInputs.Right ? 1.0 : 0.0)
+            };
+
+            if (raceStarted && !raceFinished) {
+                playerCar.updateVehiclePhysics(dt, playerCommands);
+                aiCars.forEach(ai => runAIAutonomousLogic(ai, dt));
+                computeLeaderboardPositions();
+            }
+
+            if (playerCar) {
+                const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
+                const targetCamPos = playerCar.position.clone().add(cameraOffset);
+                camera.position.lerp(targetCamPos, 0.12);
+                camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
+
+                document.getElementById('speed-out').innerText = playerCar.speed.toFixed(2);
+                document.getElementById('pos-out').innerText = `(${playerCar.position.x.toFixed(1)}, ${playerCar.position.z.toFixed(1)})`;
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
