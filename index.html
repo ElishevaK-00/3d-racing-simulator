@@ -3,56 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Vector Racing & AI Pathfinding Simulator</title>
+    <title>Advanced 3D Night Racing & AI Pathfinding Simulator</title>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #05050a; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #020208; user-select: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
-        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(10, 25, 47, 0.85); color: #64ffda; padding: 15px 25px; border-radius: 8px; border: 1px solid #172a45; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(5px); pointer-events: none; }
-        #dashboard h2 { margin: 0 0 5px 0; font-size: 1.2em; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
-        .stat { font-size: 1.1em; font-family: monospace; margin: 3px 0; }
-        #instructions { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(255,255,255,0.05); color: #ccd6f6; padding: 10px 20px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(3px); font-size: 0.9em; pointer-events: none; }
+        
+        /* Menu & UI Layers */
+        #menu-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 12, 24, 0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #menu-overlay h1 { margin-bottom: 5px; font-size: 2.5em; color: #64ffda; text-transform: uppercase; letter-spacing: 2px; }
+        .color-btn { padding: 12px 24px; margin: 10px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 1em; transition: 0.2s; }
+        
+        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 6em; font-weight: bold; color: #ff0055; z-index: 50; pointer-events: none; text-shadow: 0 0 20px rgba(255,0,85,0.6); display: none; font-family: monospace; }
+        
+        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(10, 25, 47, 0.9); color: #fff; padding: 15px 25px; border-radius: 8px; border: 2px solid #64ffda; box-shadow: 0 0 15px rgba(100,255,218,0.3); }
+        #place-display { font-size: 2.5em; font-weight: bold; color: #64ffda; font-family: monospace; text-align: center; }
+        
+        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(10, 25, 47, 0.85); color: #64ffda; padding: 15px 25px; border-radius: 8px; border: 1px solid #172a45; font-family: monospace; pointer-events: none; }
+        .stat { font-size: 1.1em; margin: 3px 0; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 
-    <div id="instructions">
-        <strong>Controls:</strong> Use <b>W, A, S, D</b> or <b>Arrow Keys</b> to steer/accelerate.
+    <div id="menu-overlay">
+        <h1>Select Vehicle Team livery</h1>
+        <p style="color: #8892b0; margin-bottom: 25px;">Choose your custom racing profile to grid up for the night circuit:</p>
+        <div>
+            <button class="color-btn" style="background: #e53e3e; color: white;" onclick="startRaceSimulation(0xe53e3e)">Formula Red</button>
+            <button class="color-btn" style="background: #d69e2e; color: white;" onclick="startRaceSimulation(0xd69e2e)">Liquid Gold</button>
+            <button class="color-btn" style="background: #00ff66; color: black;" onclick="startRaceSimulation(0x00ff66)">Neon Viper</button>
+            <button class="color-btn" style="background: #ff007f; color: white;" onclick="startRaceSimulation(0xff007f)">Cyber Pink</button>
+        </div>
+    </div>
+
+    <div id="countdown-box">3</div>
+
+    <div id="leaderboard">
+        <div style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: #8892b0;">Current Standing</div>
+        <div id="place-display">--</div>
     </div>
 
     <div id="dashboard">
-        <h2>Telemetry Metrics</h2>
-        <div class="stat">Player Speed: <span id="speed-out">0.00</span> m/s</div>
-        <div class="stat">Position: <span id="pos-out">(0.0, 0.0)</span></div>
+        <div class="stat">VELOCITY: <span id="speed-out">0.00</span> m/s</div>
+        <div class="stat">COORDINATES: <span id="pos-out">(0.0, 0.0)</span></div>
     </div>
 
     <div id="canvas-container"></div>
 
     <script>
-        // --- SYSTEM 1: ENVIRONMENT & TRACK BOUNDARIES STRUCT ---
+        // --- COMPLEX CIRCUIT GEOMETRY SYSTEM ---
         const trackWaypoints = [
-            new THREE.Vector3(0, 0, 0),
-            new THREE.Vector3(120, 0, 40),
-            new THREE.Vector3(200, 0, 150),
-            new THREE.Vector3(140, 0, 260),
-            new THREE.Vector3(0, 0, 300),
-            new THREE.Vector3(-140, 0, 240),
-            new THREE.Vector3(-200, 0, 100),
-            new THREE.Vector3(-100, 0, -20)
+            new THREE.Vector3(0, 0, 40),       // Start / Finish Straightaway
+            new THREE.Vector3(80, 2, 40),
+            new THREE.Vector3(160, 4, 90),     // Sharp Right Ascending S-Curve
+            new THREE.Vector3(220, 1, 170),
+            new THREE.Vector3(130, -1, 260),   // Hairpin Left Downhill Turn
+            new THREE.Vector3(20, 0, 290),
+            new THREE.Vector3(-80, 3, 220),    // Technical Chicanes
+            new THREE.Vector3(-150, 5, 140),
+            new THREE.Vector3(-220, 1, 50),    // Long High-Speed Sweeper
+            new THREE.Vector3(-140, 0, -30),
+            new THREE.Vector3(-60, 0, 0)
         ];
-        const trackWidth = 24;
+        const trackWidth = 26;
+        let trackCurve;
 
-        // --- GLOBAL SCENE CONFIGURATION ---
         let scene, camera, renderer, clock;
         let playerCar, aiCars = [];
-        const keys = { w: false, a: false, s: false, d: false };
+        let raceStarted = false;
+        let countdownActive = false;
+        
+        // Robust Normalized Key Mapping Structural Register
+        const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
-        function init() {
+        function startRaceSimulation(chosenColor) {
+            document.getElementById('menu-overlay').style.display = 'none';
+            init(chosenColor);
+            triggerRaceCountdown();
+        }
+
+        function init(playerColor) {
             const container = document.getElementById('canvas-container');
             
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a192f);
-            scene.fog = new THREE.FogExp2(0x0a192f, 0.0025);
+            scene.background = new THREE.Color(0x020208);
+            scene.fog = new THREE.FogExp2(0x020208, 0.003);
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
             clock = new THREE.Clock();
@@ -62,87 +97,162 @@
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-            scene.add(ambientLight);
+            // Midnight Atmospheric Lighting layers
+            const ambient = new THREE.AmbientLight(0x111125, 0.6);
+            scene.add(ambient);
             
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(100, 150, 50);
-            dirLight.castShadow = true;
-            scene.add(dirLight);
+            const moonLight = new THREE.DirectionalLight(0x7f90b0, 0.8);
+            moonLight.position.set(-80, 200, -50);
+            scene.add(moonLight);
 
-            buildTrackEnvironment();
-            spawnVehicles();
+            trackCurve = new THREE.CatmullRomCurve3(trackWaypoints, true);
 
-            window.addEventListener('keydown', (e) => handleKey(e, true));
-            window.addEventListener('keyup', (e) => handleKey(e, false));
-            window.addEventListener('resize', onWindowResize);
+            buildSceneryAndTrack();
+            spawnCustomRaceCars(playerColor);
 
-            animate();
+            // Bind Direct Key Event Handlers
+            window.addEventListener('keydown', (e) => toggleControls(e, true));
+            window.addEventListener('keyup', (e) => toggleControls(e, false));
+            window.addEventListener('resize', handleWindowResize);
         }
 
-        function buildTrackEnvironment() {
-            const floorGeo = new THREE.PlaneGeometry(1000, 1000);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x112240, roughness: 0.9 });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
+        function buildSceneryAndTrack() {
+            // 1. Moonlight Sky Scenery Architecture
+            const moonGeo = new THREE.SphereGeometry(15, 32, 32);
+            const moonMat = new THREE.MeshBasicMaterial({ color: 0xeeffff });
+            const moon = new THREE.Mesh(moonGeo, moonMat);
+            moon.position.set(-150, 180, -200);
+            scene.add(moon);
 
-            const curve = new THREE.CatmullRomCurve3(trackWaypoints, true);
-            const points = curve.getPoints(200);
-            
-            const trackGeo = new THREE.TubeGeometry(curve, 200, trackWidth / 2, 8, true);
-            const trackMat = new THREE.MeshStandardMaterial({ color: 0x233554, roughness: 0.7 });
+            // 500-Node Starfield Vector Layer
+            const starGeo = new THREE.BufferGeometry();
+            const starCoords = [];
+            for(let i=0; i<500; i++) {
+                starCoords.push((Math.random()-0.5)*800, Math.random()*300+50, (Math.random()-0.5)*800);
+            }
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, transparent: true });
+            const starfield = new THREE.Points(starGeo, starMat);
+            scene.add(starfield);
+
+            // 2. Continuous Track Mesh Generation
+            const trackGeo = new THREE.TubeGeometry(trackCurve, 300, trackWidth / 2, 12, true);
+            const trackMat = new THREE.MeshStandardMaterial({ color: 0x15161e, roughness: 0.85 });
             const trackMesh = new THREE.Mesh(trackGeo, trackMat);
-            trackMesh.scale.set(1, 0.01, 1);
-            trackMesh.position.y = 0.05;
+            trackMesh.scale.set(1, 0.005, 1); // Flatten to asphalt strip profile
             scene.add(trackMesh);
 
-            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0x64ffda });
-            const centerLine = new THREE.Line(lineGeo, lineMat);
-            centerLine.position.y = 0.1;
-            scene.add(centerLine);
+            // Start / Finish Line Layout Matrix
+            const startLineGeo = new THREE.PlaneGeometry(trackWidth - 1, 3);
+            const startLineMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9, side: THREE.DoubleSide });
+            const startLine = new THREE.Mesh(startLineGeo, startLineMat);
+            startLine.rotation.x = Math.PI / 2;
+            startLine.position.set(0, 0.1, 40);
+            scene.add(startLine);
+
+            // 3. Populate Environmental Tree Line & Crowds
+            const treeGeo = new THREE.ConeGeometry(3, 10, 5);
+            const trunkGeo = new THREE.CylinderGeometry(0.5, 0.5, 3);
+            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x0a2215, roughness: 0.9 });
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2c1d11 });
+
+            // Instantiate environmental nodes alongside circuit curve
+            for (let i = 0; i < 150; i++) {
+                const t = i / 150;
+                const pos = trackCurve.getPointAt(t);
+                const normal = trackCurve.getTangentAt(t).cross(new THREE.Vector3(0,1,0)).normalize();
+                
+                // Left & Right procedural roadside placements
+                const side = (i % 2 === 0) ? 1 : -1;
+                const distance = (trackWidth / 2) + 8 + (Math.random() * 12);
+                pos.addScaledVector(normal, side * distance);
+                pos.y = 0;
+
+                const treeCluster = new THREE.Group();
+                const foliage = new THREE.Mesh(treeGeo, foliageMat);
+                foliage.position.y = 6;
+                const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+                trunk.position.y = 1.5;
+                treeCluster.add(foliage, trunk);
+                treeCluster.position.copy(pos);
+                scene.add(treeCluster);
+            }
         }
 
-        // --- SYSTEM 2: VECTOR PHYSICS RIG ---
-        class CarEntity {
-            constructor(color, isAI = false) {
+        // --- PRODUCTION RACE VEHICLE FRAMEWORK ---
+        class CustomRaceCar {
+            constructor(color, isAI = false, label = "") {
                 this.isAI = isAI;
-                
-                this.position = new THREE.Vector3(0, 0.5, 0);
-                this.velocity = new THREE.Vector3(0, 0, 0);
-                this.heading = 0;
+                this.label = label;
+                this.position = new THREE.Vector3();
+                this.velocity = new THREE.Vector3();
+                this.heading = Math.PI / 2;
                 this.speed = 0;
-                
-                this.acceleration = 18.0; 
-                this.drag = 0.95;
-                this.braking = 25.0;
-                this.steeringSensitivity = 2.4;
-                this.maxSpeed = isAI ? 38.0 : 45.0;
+                this.lapProgress = 0; // Absolute tracking distance along the loop
 
-                this.currentWaypointIndex = 0;
+                // Vector physics thresholds
+                this.acceleration = 24.0;
+                this.drag = 0.94;
+                this.braking = 32.0;
+                this.steeringSensitivity = 2.6;
+                this.maxSpeed = isAI ? 38.0 + (Math.random() * 4) : 46.0;
 
-                const bodyGeo = new THREE.BoxGeometry(2.2, 1, 4.5);
-                const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4 });
-                this.mesh = new THREE.Mesh(bodyGeo, bodyMat);
-                this.mesh.castShadow = true;
-                
-                const cabinGeo = new THREE.BoxGeometry(1.6, 0.6, 2.0);
-                const cabinMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.1 });
-                const cabin = new THREE.Mesh(cabinGeo, cabinMat);
-                cabin.position.set(0, 0.7, -0.3);
-                this.mesh.add(cabin);
+                this.currentWaypointIndex = 1;
+
+                // Build Aerodynamic 3D Race Car Mesh Structure
+                this.mesh = new THREE.Group();
+
+                const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.3, metalness: 0.2 });
+                const trimMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5 });
+
+                // Core Chassis Base Plate
+                const baseMesh = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.4, 5.0), bodyMat);
+                baseMesh.position.y = 0.2;
+                this.mesh.add(baseMesh);
+
+                // Formula Nose Cone Segment
+                const noseMesh = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.3, 1.8), bodyMat);
+                noseMesh.position.set(0, 0.2, 2.5);
+                this.mesh.add(noseMesh);
+
+                // High-Downforce Rear Spoiler
+                const wingMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+                const wingMain = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.15, 0.8), wingMat);
+                wingMain.position.set(0, 1.4, -2.4);
+                const wingStrutLeft = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.0, 0.3), wingMat);
+                wingStrutLeft.position.set(-1.0, 0.8, -2.4);
+                const wingStrutRight = wingStrutLeft.clone();
+                wingStrutRight.position.x = 1.0;
+                this.mesh.add(wingMain, wingStrutLeft, wingStrutRight);
+
+                // Performance Wheels Rig Construction
+                const wheelGeo = new THREE.CylinderGeometry(0.55, 0.55, 0.6, 12);
+                wheelGeo.rotateZ(Math.PI / 2);
+                const wheelPositions = [
+                    [-1.3, 0.35, 1.6],  // Front Left
+                    [1.3, 0.35, 1.6],   // Front Right
+                    [-1.3, 0.35, -1.6], // Rear Left
+                    [1.3, 0.35, -1.6]   // Rear Right
+                ];
+                wheelPositions.forEach(pos => {
+                    const wheel = new THREE.Mesh(wheelGeo, trimMat);
+                    wheel.position.set(pos[0], pos[1], pos[2]);
+                    this.mesh.add(wheel);
+                });
 
                 scene.add(this.mesh);
             }
 
-            updatePhysics(dt, controls) {
+            updateVehiclePhysics(dt, controls) {
+                if (!raceStarted) return;
+
+                // Steer Integration Angular Forces
                 if (controls.steer !== 0) {
-                    const turnFactor = Math.min(this.speed / 10.0, 1.0);
-                    this.heading += controls.steer * this.steeringSensitivity * turnFactor * dt;
+                    const steeringLock = Math.min(this.speed / 12.0, 1.0);
+                    this.heading += controls.steer * this.steeringSensitivity * steeringLock * dt;
                 }
 
+                // Accelerator Force Resolution
                 if (controls.gas > 0) {
                     this.speed += this.acceleration * controls.gas * dt;
                 } else if (controls.brake > 0) {
@@ -151,7 +261,7 @@
                     this.speed *= Math.pow(this.drag, dt * 10);
                 }
 
-                this.speed = THREE.MathUtils.clamp(this.speed, -10.0, this.maxSpeed);
+                this.speed = THREE.MathUtils.clamp(this.speed, -8.0, this.maxSpeed);
 
                 this.velocity.set(
                     Math.sin(this.heading) * this.speed,
@@ -159,132 +269,191 @@
                     Math.cos(this.heading) * this.speed
                 );
 
-                const provisionalPosition = this.position.clone().addScaledVector(this.velocity, dt);
-                if (this.verifyTrackContainment(provisionalPosition)) {
-                    this.position.copy(provisionalPosition);
+                const nextPos = this.position.clone().addScaledVector(this.velocity, dt);
+
+                if (this.checkCircuitContainment(nextPos)) {
+                    this.position.copy(nextPos);
                 } else {
-                    this.speed *= -0.4; 
+                    this.speed *= -0.35; // Crash momentum wall penalty dump
                     this.position.addScaledVector(this.velocity, -dt * 0.5);
                 }
 
+                // Snap structural matrices
                 this.mesh.position.copy(this.position);
                 this.mesh.rotation.y = this.heading;
+
+                // Project scalar trajectory timeline marker to capture loop positioning
+                this.calculateLapProgress();
             }
 
-            verifyTrackContainment(provisionalPos) {
-                let minDistanceSq = Infinity;
-                
+            checkCircuitContainment(provisionalPos) {
+                let shortestDistSq = Infinity;
                 for (let i = 0; i < trackWaypoints.length; i++) {
-                    const nextIndex = (i + 1) % trackWaypoints.length;
+                    const next = (i + 1) % trackWaypoints.length;
                     const p1 = trackWaypoints[i];
-                    const p2 = trackWaypoints[nextIndex];
+                    const p2 = trackWaypoints[next];
 
                     const ab = p2.clone().sub(p1);
                     const ap = provisionalPos.clone().sub(p1);
-                    const factor = THREE.MathUtils.clamp(ap.dot(ab) / ab.lengthSq(), 0, 1);
-                    const closestPoint = p1.clone().add(ab.multiplyScalar(factor));
+                    const projection = THREE.MathUtils.clamp(ap.dot(ab) / ab.lengthSq(), 0, 1);
+                    const closest = p1.clone().add(ab.multiplyScalar(projection));
                     
-                    const distSq = provisionalPos.distanceToSquared(closestPoint);
-                    if (distSq < minDistanceSq) {
-                        minDistanceSq = distSq;
+                    const distSq = provisionalPos.distanceToSquared(closest);
+                    if (distSq < shortestDistSq) shortestDistSq = distSq;
+                }
+                return shortestDistSq <= (trackWidth * trackWidth) / 3.8;
+            }
+
+            calculateLapProgress() {
+                // Approximate position scalar index parameter mapping
+                let nearestT = 0;
+                let minDist = Infinity;
+                // Evaluate 60 precision matrix nodes across track loop
+                for (let i = 0; i <= 60; i++) {
+                    const testT = i / 60;
+                    const trackPt = trackCurve.getPointAt(testT);
+                    const d = this.position.distanceToSquared(trackPt);
+                    if (d < minDist) {
+                        minDist = d;
+                        nearestT = testT;
                     }
                 }
-                return minDistanceSq <= (trackWidth * trackWidth) / 3.6;
+                this.lapProgress = nearestT;
             }
         }
 
-        // --- SYSTEM 3: AI PATHFINDING ENGINE ---
-        function executeAIProcessing(car, dt) {
-            let target = trackWaypoints[car.currentWaypointIndex];
-            
-            if (car.position.distanceTo(target) < 25) {
-                car.currentWaypointIndex = (car.currentWaypointIndex + 1) % trackWaypoints.length;
-                target = trackWaypoints[car.currentWaypointIndex];
-            }
-
-            const desiredHeading = Math.atan2(target.x - car.position.x, target.z - car.position.z);
-            let headingError = desiredHeading - car.heading;
-
-            while (headingError < -Math.PI) headingError += Math.PI * 2;
-            while (headingError > Math.PI) headingError -= Math.PI * 2;
-
-            let steerCommand = 0;
-            if (Math.abs(headingError) > 0.05) {
-                steerCommand = headingError > 0 ? 1 : -1;
-            }
-
-            const throttleCurve = Math.abs(headingError) > 0.4 ? 0.4 : 1.0;
-
-            car.updatePhysics(dt, {
-                gas: throttleCurve,
-                brake: 0,
-                steer: steerCommand
-            });
-        }
-
-        function spawnVehicles() {
-            // Player car assembly placement - Staggered cleanly forward
-            playerCar = new CarEntity(0xe53e3e, false);
-            playerCar.position.set(0, 0.5, 40); 
+        function spawnCustomRaceCars(playerColor) {
+            // Position player directly aligned on track grid layout
+            playerCar = new CustomRaceCar(playerColor, false, "Player");
+            playerCar.position.set(5, 0.4, 40);
             playerCar.heading = Math.PI / 2;
 
-            // Spawn AI grid cars array configurations - Spaced out backward
-            const aiColors = [0x3182ce, 0x38a169, 0xd69e2e];
+            // Stagger AI competitors safely behind the player configuration line
+            const configColors = [0x1a7cc3, 0xe28743, 0x8e44ad];
             for (let i = 0; i < 3; i++) {
-                const ai = new CarEntity(aiColors[i], true);
-                ai.position.set((i + 1) * -5, 0.5, 10 - (i * 15));
+                const ai = new CustomRaceCar(configColors[i], true, `AI_${i+1}`);
+                ai.position.set(-6, 0.4, 25 - (i * 18));
                 ai.heading = Math.PI / 2;
-                ai.currentWaypointIndex = 1;
                 aiCars.push(ai);
             }
         }
 
-        function handleKey(event, isPressed) {
-            switch(event.code) {
-                case 'KeyW': case 'ArrowUp': keys.w = isPressed; break;
-                case 'KeyA': case 'ArrowLeft': keys.a = isPressed; break;
-                case 'KeyS': case 'ArrowDown': keys.s = isPressed; break;
-                case 'KeyD': case 'ArrowRight': keys.d = isPressed; break;
+        function triggerRaceCountdown() {
+            countdownActive = true;
+            const screenBox = document.getElementById('countdown-box');
+            screenBox.style.display = 'block';
+            
+            let count = 3;
+            const timer = setInterval(() => {
+                count--;
+                if (count === 0) {
+                    screenBox.innerText = "GO!";
+                    screenBox.style.color = "#64ffda";
+                    raceStarted = true;
+                } else if (count < 0) {
+                    clearInterval(timer);
+                    screenBox.style.display = 'none';
+                    countdownActive = false;
+                } else {
+                    screenBox.innerText = count;
+                }
+            }, 1000);
+        }
+
+        function toggleControls(event, isPressed) {
+            switch(event.key) {
+                case 'w': case 'W': case 'ArrowUp': activeInputs.Forward = isPressed; break;
+                case 's': case 'S': case 'ArrowDown': activeInputs.Backward = isPressed; break;
+                case 'a': case 'A': case 'ArrowLeft': activeInputs.Left = isPressed; break;
+                case 'd': case 'D': case 'ArrowRight': activeInputs.Right = isPressed; break;
             }
         }
 
-        function onWindowResize() {
+        // --- PATHFINDING & POSITION TRACKING LAYER ---
+        function runAIAutonomousLogic(car, dt) {
+            let target = trackWaypoints[car.currentWaypointIndex];
+            if (car.position.distanceTo(target) < 28) {
+                car.currentWaypointIndex = (car.currentWaypointIndex + 1) % trackWaypoints.length;
+                target = trackWaypoints[car.currentWaypointIndex];
+            }
+
+            const angleRad = Math.atan2(target.x - car.position.x, target.z - car.position.z);
+            let angularDiff = angleRad - car.heading;
+
+            while (angularDiff < -Math.PI) angularDiff += Math.PI * 2;
+            while (angularDiff > Math.PI) angularDiff -= Math.PI * 2;
+
+            let steerVal = 0;
+            if (Math.abs(angularDiff) > 0.04) steerVal = angularDiff > 0 ? 1 : -1;
+            const corneringThrottle = Math.abs(angularDiff) > 0.35 ? 0.35 : 1.0;
+
+            car.updateVehiclePhysics(dt, { gas: corneringThrottle, brake: 0, steer: steerVal });
+        }
+
+        function processLeaderboardStandings() {
+            if (!playerCar) return;
+            // Compile every vehicle array to calculate field hierarchy parameters
+            let field = [playerCar, ...aiCars];
+            
+            // Sort structural metrics based on loop timeline milestones
+            field.sort((a, b) => b.lapProgress - a.lapProgress);
+            
+            const idx = field.findIndex(car => car.label === "Player");
+            const placement = idx + 1;
+            
+            let suffix = "TH";
+            if (placement === 1) suffix = "ST";
+            else if (placement === 2) suffix = "ND";
+            else if (placement === 3) suffix = "RD";
+
+            document.getElementById('place-display').innerText = placement + suffix;
+        }
+
+        function handleWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // --- CORE RUNTIME LOOP ---
+        // --- MASTER FRAME ENGINE RUNTIME LOOP ---
         function animate() {
             requestAnimationFrame(animate);
 
             const dt = Math.min(clock.getDelta(), 0.1);
 
-            const playerInputs = {
-                gas: keys.w ? 1.0 : 0.0,
-                brake: keys.s ? 1.0 : 0.0,
-                steer: (keys.a ? 1.0 : 0.0) - (keys.d ? 1.0 : 0.0)
+            const humanCommands = {
+                gas: activeInputs.Forward ? 1.0 : 0.0,
+                brake: activeInputs.Backward ? 1.0 : 0.0,
+                steer: (activeInputs.Left ? 1.0 : 0.0) - (activeInputs.Right ? 1.0 : 0.0)
             };
 
-            playerCar.updatePhysics(dt, playerInputs);
-            aiCars.forEach(ai => executeAIProcessing(ai, dt));
+            // Process physics computations
+            if (raceStarted) {
+                playerCar.updateVehiclePhysics(dt, humanCommands);
+                aiCars.forEach(ai => runAIAutonomousLogic(ai, dt));
+                processLeaderboardStandings();
+            }
 
-            const targetCamOffset = new THREE.Vector3(
-                -Math.sin(playerCar.heading) * 18,
-                8,
-                -Math.cos(playerCar.heading) * 18
-            );
-            const idealCameraPosition = playerCar.position.clone().add(targetCamOffset);
-            camera.position.lerp(idealCameraPosition, 0.1); 
-            camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 1, 4)));
+            // Third-Person Rigid Chase Camera Array Rig Tracking
+            if (playerCar) {
+                const cameraChasingOffset = new THREE.Vector3(
+                    -Math.sin(playerCar.heading) * 16,
+                    6.5,
+                    -Math.cos(playerCar.heading) * 16
+                );
+                const targetCameraCoord = playerCar.position.clone().add(cameraChasingOffset);
+                camera.position.lerp(targetCameraCoord, 0.12);
+                camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
 
-            document.getElementById('speed-out').innerText = playerCar.speed.toFixed(2);
-            document.getElementById('pos-out').innerText = `(${playerCar.position.x.toFixed(1)}, ${playerCar.position.z.toFixed(1)})`;
+                // Sync UI dashboard metrics telemetry layers
+                document.getElementById('speed-out').innerText = playerCar.speed.toFixed(2);
+                document.getElementById('pos-out').innerText = `(${playerCar.position.x.toFixed(1)}, ${playerCar.position.z.toFixed(1)})`;
+            }
 
             renderer.render(scene, camera);
         }
 
-        window.onload = init;
+        animate();
     </script>
 </body>
 </html>
