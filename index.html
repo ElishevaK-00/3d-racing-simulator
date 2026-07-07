@@ -52,8 +52,8 @@
     <div id="victory-screen">
         <div id="victory-card">
             <h2>🏆 CONGRATULATIONS! 🏆</h2>
-            <p style="font-size: 1.3em; margin: 10px 0 0; color: #ccd6f6;">You crossed the checkered finish line!</p>
-            <div id="victory-place">FINAL STANDING: 1ST PLACE</div>
+            <p style="font-size: 1.3em; margin: 10px 0 0; color: #ccd6f6;">You crossed the finish line!</p>
+            <div id="victory-place">FINAL STANDING: --</div>
             <button class="restart-btn" onclick="window.location.reload()">Race Again</button>
         </div>
     </div>
@@ -73,7 +73,7 @@
     <div id="canvas-container"></div>
 
     <script>
-        // --- GEOMETRIC SPLINE COMPLEX CIRCUIT ---
+        // --- GEOMETRIC SPLINE CIRCUIT ---
         const trackWaypoints = [
             new THREE.Vector3(0, 0, 40),        // Start Straight
             new THREE.Vector3(100, 0, 40),
@@ -94,10 +94,10 @@
         let obstacles = [];
         let raceStarted = false;
         let raceFinished = false;
+        let finalPlayerRank = "--";
         
         const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
-        // FIXED: Renamed function here to explicitly match your button action listeners!
         function startRaceSimulation(chosenColor) {
             document.getElementById('menu-overlay').style.display = 'none';
             init(chosenColor);
@@ -131,6 +131,9 @@
             window.addEventListener('keyup', (e) => toggleControls(e, false));
             window.addEventListener('resize', handleWindowResize);
 
+            // Execute initial ranking check so UI doesn't start blank
+            computeLeaderboardPositions();
+
             animate();
         }
 
@@ -145,7 +148,7 @@
             const starfield = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.7 }));
             scene.add(starfield);
 
-            // 1. Drivable Track Asphalt
+            // Asphalt Track Strip
             const trackGeo = new THREE.TubeGeometry(trackCurve, 300, trackWidth / 2, 10, true);
             const trackMat = new THREE.MeshStandardMaterial({ 
                 color: 0x181a22, 
@@ -156,23 +159,24 @@
             trackMesh.scale.set(1, 0.005, 1);
             scene.add(trackMesh);
 
-            // 2. High-Visibility Checkered Finish Line Strip
+            // FIXED: Checkered Finish Line Strip laid horizontal across the track floor surface
             const checkeredGroup = new THREE.Group();
-            const sizeX = 1.8, sizeZ = 1.8;
-            for(let i = 0; i < 15; i++) {
-                for(let j = 0; j < 2; j++) {
+            const sizeX = 1.8, sizeZ = 1.0;
+            for(let i = 0; i < 16; i++) {
+                for(let j = 0; j < 3; j++) {
                     const boxGeo = new THREE.PlaneGeometry(sizeX, sizeZ);
                     const isWhite = (i + j) % 2 === 0;
                     const mat = new THREE.MeshBasicMaterial({ color: isWhite ? 0xffffff : 0x000000, side: THREE.DoubleSide });
                     const tile = new THREE.Mesh(boxGeo, mat);
-                    tile.rotation.x = Math.PI / 2;
-                    tile.position.set(-13.5 + (i * sizeX), 0.08, 40 + (j * sizeZ));
+                    
+                    tile.rotation.x = Math.PI / 2; // Flat on ground floor plane
+                    tile.position.set(-14.0 + (i * sizeX), 0.08, 40.0 + (j * sizeZ));
                     checkeredGroup.add(tile);
                 }
             }
             scene.add(checkeredGroup);
 
-            // 3. HIGH-INTENSITY STREET LIGHTS
+            // HIGH-INTENSITY STREET LIGHTS
             const poleGeo = new THREE.CylinderGeometry(0.18, 0.25, 10);
             const armGeo = new THREE.CylinderGeometry(0.12, 0.12, 4);
             armGeo.rotateZ(Math.PI / 2);
@@ -200,13 +204,11 @@
 
                 const spot = new THREE.SpotLight(0xfff6cc, 8.0, 50, Math.PI / 3, 0.6, 0.8);
                 spot.position.set(-4, 9.8, 0);
-                
                 spot.target.position.copy(trackPt);
                 scene.add(spot.target);
 
                 streetLight.add(pole, arm, bulb, spot);
                 streetLight.position.copy(polePos);
-                
                 streetLight.lookAt(trackPt); 
                 scene.add(streetLight);
             }
@@ -255,7 +257,7 @@
             });
         }
 
-        // --- STABLE VECTOR RACING RIG ---
+        // --- PRODUCTION RACE VEHICLE FRAMEWORK ---
         class CustomRaceCar {
             constructor(color, isAI = false, label = "") {
                 this.isAI = isAI;
@@ -274,9 +276,10 @@
                 this.drag = 0.93;
                 this.braking = 35.0;
                 this.steeringSensitivity = 3.2; 
-                this.maxSpeed = isAI ? 34.0 + (Math.random() * 5) : 46.0;
+                this.maxSpeed = isAI ? 33.0 + (Math.random() * 4) : 46.0;
 
-                this.currentWaypointIndex = 1;
+                // FIXED AI Tracking system route parameters
+                this.currentWaypointProgressNode = 0.05; 
 
                 this.mesh = new THREE.Group();
                 const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.2 });
@@ -303,6 +306,7 @@
             }
 
             updateVehiclePhysics(dt, controls) {
+                // Steer Command Mapping
                 if (controls.steer !== 0) {
                     this.heading += controls.steer * this.steeringSensitivity * dt;
                 }
@@ -387,16 +391,19 @@
             trackLapCompletionMilestones() {
                 const pastProgress = this.lapProgress;
                 this.calculateLapProgress();
-                if (pastProgress > 0.92 && this.lapProgress < 0.08 && !raceFinished) {
+                // Cross loop reset back to finish threshold straightaway bounds
+                if (pastProgress > 0.94 && this.lapProgress < 0.06 && !raceFinished && raceStarted) {
                     triggerRaceVictoryEvent();
                 }
             }
 
+            // FIXED: Enhanced high-precision coordinate loop spline projecting scanner tracker
             calculateLapProgress() {
                 let nearestT = 0;
                 let minDist = Infinity;
-                for (let i = 0; i <= 80; i++) {
-                    const testT = i / 80;
+                const scans = 150; // Boost sample matrix nodes to prevent ghost positioning bugs
+                for (let i = 0; i <= scans; i++) {
+                    const testT = i / scans;
                     const trackPt = trackCurve.getPointAt(testT);
                     const d = this.position.distanceToSquared(trackPt);
                     if (d < minDist) {
@@ -409,15 +416,18 @@
         }
 
         function spawnCustomRaceCars(playerColor) {
+            // Player placement on start grid line
             playerCar = new CustomRaceCar(playerColor, false, "Player");
-            playerCar.position.set(5, 0.4, 40);
-            playerCar.heading = Math.PI / 2;
+            playerCar.position.set(4, 0.4, 38);
+            playerCar.heading = Math.PI * 2; // Face forward direction along track straightway
 
-            const aiColors = [0xe28743, 0x8e44ad, 0x00ffff, 0xffaa00, 0x00ffcc];
-            for (let i = 0; i < 5; i++) {
+            // Spawn 4 unique AI competitors to make a complete 5 car racing field grid line-up
+            const aiColors = [0xe28743, 0x8e44ad, 0x00ffff, 0xffaa00];
+            for (let i = 0; i < 4; i++) {
                 const ai = new CustomRaceCar(aiColors[i], true, `AI_${i+1}`);
-                ai.position.set((i % 2 === 0 ? -5 : -10), 0.4, 25 - (i * 12));
-                ai.heading = Math.PI / 2;
+                // Arrange grid cleanly stacked back to back on starting line
+                ai.position.set((i % 2 === 0 ? -4 : -9), 0.4, 25 - (i * 14));
+                ai.heading = Math.PI * 2;
                 aiCars.push(ai);
             }
         }
@@ -451,13 +461,13 @@
             }
         }
 
-        // --- WAYPOINT AI ---
+        // --- FIXED HIGH-PRECISION SPLINE AI PATHFINDING Logic ---
         function runAIAutonomousLogic(car, dt) {
-            let target = trackWaypoints[car.currentWaypointIndex];
-            if (car.position.distanceTo(target) < 28) {
-                car.currentWaypointIndex = (car.currentWaypointIndex + 1) % trackWaypoints.length;
-                target = trackWaypoints[car.currentWaypointIndex];
-            }
+            // Track dynamic increment targets smoothly along loops
+            car.currentWaypointProgressNode += 0.015 * dt * (car.speed / 10 + 1);
+            if (car.currentWaypointProgressNode > 1.0) car.currentWaypointProgressNode -= 1.0;
+
+            const target = trackCurve.getPointAt(car.currentWaypointProgressNode);
 
             const desiredAngle = Math.atan2(target.x - car.position.x, target.z - car.position.z);
             let angularErr = desiredAngle - car.heading;
@@ -467,30 +477,39 @@
 
             let steerVal = 0;
             if (Math.abs(angularErr) > 0.04) steerVal = angularErr > 0 ? 1 : -1;
-            const curveDampener = Math.abs(angularErr) > 0.38 ? 0.4 : 1.0;
+            const curveDampener = Math.abs(angularErr) > 0.35 ? 0.45 : 1.0;
 
             car.updateVehiclePhysics(dt, { gas: curveDampener, brake: 0, steer: steerVal });
         }
 
+        // FIXED: Accurate Real-time sorting leaderboard tracker
         function computeLeaderboardPositions() {
-            if(!playerCar || raceFinished) return;
+            if(!playerCar) return;
+            
+            // Build absolute 5-car grid matrix context array
             let pack = [playerCar, ...aiCars];
+            
+            // Sort progress accurately by scalar lap progress milestones
             pack.sort((a, b) => b.lapProgress - a.lapProgress);
             
             const rank = pack.findIndex(c => c.label === "Player") + 1;
-            const suffix = ["ST", "ND", "RD", "TH", "TH", "TH"][rank - 1];
+            const suffix = ["ST", "ND", "RD", "TH", "TH"][rank - 1];
             
-            document.getElementById('place-display').innerText = rank + suffix;
-            return rank + suffix;
+            const displayRank = rank + suffix;
+            
+            if(!raceFinished) {
+                document.getElementById('place-display').innerText = displayRank;
+                finalPlayerRank = displayRank;
+            }
+            return displayRank;
         }
 
         function triggerRaceVictoryEvent() {
             raceFinished = true;
             raceStarted = false;
             
-            const finalStanding = computeLeaderboardPositions();
-            
-            document.getElementById('victory-place').innerText = `FINAL STANDING: ${finalStanding} PLACE`;
+            // FIXED: Locked exact dynamic victory score readout (Eliminated undefined bugs)
+            document.getElementById('victory-place').innerText = `FINAL STANDING: ${finalPlayerRank} PLACE`;
             document.getElementById('victory-screen').style.display = 'flex';
             document.getElementById('confetti-canvas').style.display = 'block';
             
@@ -560,12 +579,14 @@
                 steer: (activeInputs.Left ? 1.0 : 0.0) - (activeInputs.Right ? 1.0 : 0.0)
             };
 
+            // Drive core systems computations logic loop
             if (raceStarted && !raceFinished) {
                 playerCar.updateVehiclePhysics(dt, playerCommands);
                 aiCars.forEach(ai => runAIAutonomousLogic(ai, dt));
                 computeLeaderboardPositions();
             }
 
+            // FIXED: Chase Camera runs outside start-state restriction so car is fully visible on frame 1
             if (playerCar) {
                 const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
                 const targetCamPos = playerCar.position.clone().add(cameraOffset);
