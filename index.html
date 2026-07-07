@@ -30,7 +30,6 @@
 
     <script>
         // --- SYSTEM 1: ENVIRONMENT & TRACK BOUNDARIES STRUCT ---
-        // Define track configuration vectors (a loop layout)
         const trackWaypoints = [
             new THREE.Vector3(0, 0, 0),
             new THREE.Vector3(120, 0, 40),
@@ -63,7 +62,6 @@
             renderer.shadowMap.enabled = true;
             container.appendChild(renderer.domElement);
 
-            // Lighting architecture
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
             scene.add(ambientLight);
             
@@ -75,7 +73,6 @@
             buildTrackEnvironment();
             spawnVehicles();
 
-            // Set input event handlers
             window.addEventListener('keydown', (e) => handleKey(e, true));
             window.addEventListener('keyup', (e) => handleKey(e, false));
             window.addEventListener('resize', onWindowResize);
@@ -84,28 +81,25 @@
         }
 
         function buildTrackEnvironment() {
-            // Generate ground grid plane
             const floorGeo = new THREE.PlaneGeometry(1000, 1000);
-            const floorMat = new THREE.MeshStandardMaterial({ color: #112240, roughness: 0.9 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x112240, roughness: 0.9 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
             scene.add(floor);
 
-            // Construct visual track geometry using a continuous CatmullRom curve
             const curve = new THREE.CatmullRomCurve3(trackWaypoints, true);
             const points = curve.getPoints(200);
             
             const trackGeo = new THREE.TubeGeometry(curve, 200, trackWidth / 2, 8, true);
-            const trackMat = new THREE.MeshStandardMaterial({ color: #233554, roughness: 0.7, wireframe: false });
+            const trackMat = new THREE.MeshStandardMaterial({ color: 0x233554, roughness: 0.7 });
             const trackMesh = new THREE.Mesh(trackGeo, trackMat);
-            trackMesh.scale.set(1, 0.01, 1); // Flatten tube into flat track strip
+            trackMesh.scale.set(1, 0.01, 1);
             trackMesh.position.y = 0.05;
             scene.add(trackMesh);
 
-            // Add center dividing layout line
             const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
-            const lineMat = new THREE.LineBasicMaterial({ color: #64ffda });
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x64ffda });
             const centerLine = new THREE.Line(lineGeo, lineMat);
             centerLine.position.y = 0.1;
             scene.add(centerLine);
@@ -116,29 +110,24 @@
             constructor(color, isAI = false) {
                 this.isAI = isAI;
                 
-                // Physics metrics initialization
                 this.position = new THREE.Vector3(0, 0.5, 0);
                 this.velocity = new THREE.Vector3(0, 0, 0);
-                this.heading = 0; // Direction angle in radians
+                this.heading = 0;
                 this.speed = 0;
                 
-                // Dynamic limits parameters
                 this.acceleration = 18.0; 
                 this.drag = 0.95;
                 this.braking = 25.0;
                 this.steeringSensitivity = 2.4;
-                this.maxSpeed = isAI ? 38.0 : 45.0; // Give player slight edge
+                this.maxSpeed = isAI ? 38.0 : 45.0;
 
-                // AI Pathfinding target states
                 this.currentWaypointIndex = 0;
 
-                // Build 3D structural model wire meshes
                 const bodyGeo = new THREE.BoxGeometry(2.2, 1, 4.5);
                 const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4 });
                 this.mesh = new THREE.Mesh(bodyGeo, bodyMat);
                 this.mesh.castShadow = true;
                 
-                // Simple cockpit design block overlay
                 const cabinGeo = new THREE.BoxGeometry(1.6, 0.6, 2.0);
                 const cabinMat = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.1 });
                 const cabin = new THREE.Mesh(cabinGeo, cabinMat);
@@ -149,59 +138,47 @@
             }
 
             updatePhysics(dt, controls) {
-                // Steer logic angular momentum
                 if (controls.steer !== 0) {
-                    // Turn radius dependent on asset forward velocity scale
                     const turnFactor = Math.min(this.speed / 10.0, 1.0);
                     this.heading += controls.steer * this.steeringSensitivity * turnFactor * dt;
                 }
 
-                // Gas/Brake directional forces vector resolution
                 if (controls.gas > 0) {
                     this.speed += this.acceleration * controls.gas * dt;
                 } else if (controls.brake > 0) {
                     this.speed -= this.braking * controls.brake * dt;
                 } else {
-                    // Standard drag decay application
                     this.speed *= Math.pow(this.drag, dt * 10);
                 }
 
-                // Velocity containment ceiling caps
                 this.speed = THREE.MathUtils.clamp(this.speed, -10.0, this.maxSpeed);
 
-                // Update 2D Cartesian plane translation coordinates
                 this.velocity.set(
                     Math.sin(this.heading) * this.speed,
                     0,
                     Math.cos(this.heading) * this.speed
                 );
 
-                // Boundary containment verification checks
                 const provisionalPosition = this.position.clone().addScaledVector(this.velocity, dt);
                 if (this.verifyTrackContainment(provisionalPosition)) {
                     this.position.copy(provisionalPosition);
                 } else {
-                    // Wall collision response momentum dump vector reaction
                     this.speed *= -0.4; 
                     this.position.addScaledVector(this.velocity, -dt * 0.5);
                 }
 
-                // Push position and orientation frames to 3D matrix objects
                 this.mesh.position.copy(this.position);
                 this.mesh.rotation.y = this.heading;
             }
 
             verifyTrackContainment(provisionalPos) {
-                // Find shortest distance vector between car and center loop track spline
                 let minDistanceSq = Infinity;
                 
-                // Iterate spatial sub-segments to check bounds constraints
                 for (let i = 0; i < trackWaypoints.length; i++) {
                     const nextIndex = (i + 1) % trackWaypoints.length;
                     const p1 = trackWaypoints[i];
                     const p2 = trackWaypoints[nextIndex];
 
-                    // Project point onto line segment matrix calculations
                     const ab = p2.clone().sub(p1);
                     const ap = provisionalPos.clone().sub(p1);
                     const factor = THREE.MathUtils.clamp(ap.dot(ab) / ab.lengthSq(), 0, 1);
@@ -212,7 +189,6 @@
                         minDistanceSq = distSq;
                     }
                 }
-                // Return flag verifying if car is inside acceptable width boundary parameters
                 return minDistanceSq <= (trackWidth * trackWidth) / 3.6;
             }
         }
@@ -221,27 +197,22 @@
         function executeAIProcessing(car, dt) {
             let target = trackWaypoints[car.currentWaypointIndex];
             
-            // If car reaches close proximity vector to target waypoint, shift to tracking next node array index
             if (car.position.distanceTo(target) < 25) {
                 car.currentWaypointIndex = (car.currentWaypointIndex + 1) % trackWaypoints.length;
                 target = trackWaypoints[car.currentWaypointIndex];
             }
 
-            // Vector math tracking trajectory orientation calculation delta parameters
             const desiredHeading = Math.atan2(target.x - car.position.x, target.z - car.position.z);
             let headingError = desiredHeading - car.heading;
 
-            // Balance radian wrap boundaries (-PI to +PI tracking configurations)
             while (headingError < -Math.PI) headingError += Math.PI * 2;
             while (headingError > Math.PI) headingError -= Math.PI * 2;
 
-            // Generate control parameters
             let steerCommand = 0;
             if (Math.abs(headingError) > 0.05) {
                 steerCommand = headingError > 0 ? 1 : -1;
             }
 
-            // Dynamically scale down speed parameters when rounding sharp turns
             const throttleCurve = Math.abs(headingError) > 0.4 ? 0.4 : 1.0;
 
             car.updatePhysics(dt, {
@@ -252,16 +223,16 @@
         }
 
         function spawnVehicles() {
-            // Player car assembly placement instantiations
+            // Player car assembly placement - Staggered cleanly forward
             playerCar = new CarEntity(0xe53e3e, false);
-            playerCar.position.set(0, 0.5, 10);
+            playerCar.position.set(0, 0.5, 40); 
             playerCar.heading = Math.PI / 2;
 
-            // Spawn AI grid cars array configurations
+            // Spawn AI grid cars array configurations - Spaced out backward
             const aiColors = [0x3182ce, 0x38a169, 0xd69e2e];
             for (let i = 0; i < 3; i++) {
                 const ai = new CarEntity(aiColors[i], true);
-                ai.position.set((i + 1) * -6, 0.5, 0 - (i * 4));
+                ai.position.set((i + 1) * -5, 0.5, 10 - (i * 15));
                 ai.heading = Math.PI / 2;
                 ai.currentWaypointIndex = 1;
                 aiCars.push(ai);
@@ -287,37 +258,32 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            const dt = Math.min(clock.getDelta(), 0.1); // Clamp maximum framerate delta time leaks
+            const dt = Math.min(clock.getDelta(), 0.1);
 
-            // Standard Keyboard control logic mapping configurations for human player interaction
             const playerInputs = {
                 gas: keys.w ? 1.0 : 0.0,
                 brake: keys.s ? 1.0 : 0.0,
                 steer: (keys.a ? 1.0 : 0.0) - (keys.d ? 1.0 : 0.0)
             };
 
-            // Drive physics engines execution loop layers
             playerCar.updatePhysics(dt, playerInputs);
             aiCars.forEach(ai => executeAIProcessing(ai, dt));
 
-            // Third-person camera trailing vector chasing logic setup
             const targetCamOffset = new THREE.Vector3(
                 -Math.sin(playerCar.heading) * 18,
                 8,
                 -Math.cos(playerCar.heading) * 18
             );
             const idealCameraPosition = playerCar.position.clone().add(targetCamOffset);
-            camera.position.lerp(idealCameraPosition, 0.1); // Smooth linear structural camera interpolations
+            camera.position.lerp(idealCameraPosition, 0.1); 
             camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 1, 4)));
 
-            // Inject telemetry outputs to DOM dashboard elements panels
             document.getElementById('speed-out').innerText = playerCar.speed.toFixed(2);
             document.getElementById('pos-out').innerText = `(${playerCar.position.x.toFixed(1)}, ${playerCar.position.z.toFixed(1)})`;
 
             renderer.render(scene, camera);
         }
 
-        // Start initialization configuration cycle
         window.onload = init;
     </script>
 </body>
