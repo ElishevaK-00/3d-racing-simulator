@@ -3,82 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midnight Circuit - Pro Edition</title>
+    <title>Midnight Circuit - Grand Prix</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;800;900&display=swap');
         
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background-color: #050505; user-select: none; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Outfit', sans-serif; background-color: #000; user-select: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
         
-        /* eSports Simulator Menu Redesign */
+        /* Premium Glassmorphism Menu */
         #menu-overlay { 
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background-color: #0b0c10;
-            background-image: radial-gradient(#1f2833 1px, transparent 1px);
-            background-size: 30px 30px;
+            background: radial-gradient(circle at center, rgba(10,15,30,0.85) 0%, rgba(2,3,5,0.98) 100%);
             z-index: 100; display: flex; align-items: center; justify-content: center; color: white;
-            box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
         }
         
         .menu-panel {
-            background: #0b0c10;
-            border: 2px solid #45a29e;
-            padding: 50px;
-            border-radius: 4px;
-            box-shadow: 0 0 40px rgba(69, 162, 158, 0.2), inset 0 0 20px rgba(69, 162, 158, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 60px 80px;
+            border-radius: 24px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);
             text-align: center;
             max-width: 900px;
         }
 
         .title-racer { 
-            font-family: 'Share Tech Mono', monospace; font-size: 5em; margin: 0; color: #66fcf1; 
-            text-transform: uppercase; letter-spacing: 2px; line-height: 1;
-            text-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
+            font-size: 5.5em; margin: 0; color: #ffffff; 
+            text-transform: uppercase; font-weight: 900; letter-spacing: -2px; line-height: 1;
         }
-        .subtitle { color: #c5c6c7; margin: 10px 0 40px 0; font-size: 1.3em; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; }
+        .subtitle { color: #a0aec0; margin: 10px 0 40px 0; font-size: 1.2em; font-weight: 500; letter-spacing: 8px; text-transform: uppercase; }
         
         .name-input { 
-            background: #1f2833; border: 2px solid #45a29e; color: #66fcf1; border-radius: 2px;
-            padding: 15px 20px; font-size: 1.6em; font-family: 'Share Tech Mono', monospace;
-            text-align: center; outline: none; width: 70%; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
-            margin-bottom: 40px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 12px;
+            padding: 18px 25px; font-size: 1.5em; font-family: 'Outfit', sans-serif; font-weight: 800;
+            text-align: center; outline: none; width: 75%; text-transform: uppercase; letter-spacing: 3px; transition: 0.3s;
+            margin-bottom: 40px;
         }
-        .name-input:focus { background: #0b0c10; box-shadow: 0 0 15px rgba(102, 252, 241, 0.4); }
-        .name-input::placeholder { color: #45a29e; opacity: 0.5; }
+        .name-input:focus { background: rgba(0,0,0,0.5); border-color: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .name-input::placeholder { color: #718096; font-weight: 500; }
 
-        .btn-grid { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .btn-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
         .car-card {
-            background: #1f2833; border: 2px solid #1f2833;
-            padding: 12px; border-radius: 2px; cursor: pointer; transition: 0.2s; width: 110px;
+            background: transparent; border: none;
+            padding: 10px; border-radius: 16px; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 110px;
         }
-        .car-card:hover { transform: translateY(-4px); border-color: #66fcf1; background: #0b0c10; box-shadow: 0 8px 15px rgba(0,0,0,0.6); }
-        .color-preview { height: 45px; border-radius: 2px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
-        .car-name { font-size: 1.1em; font-weight: 700; text-transform: uppercase; color: #c5c6c7; line-height: 1.1; }
+        .car-card:hover { transform: translateY(-8px); background: rgba(255,255,255,0.05); }
+        .color-preview { height: 60px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .car-card:hover .color-preview { transform: scale(1.05); }
+        .car-name { font-size: 0.9em; font-weight: 800; text-transform: uppercase; color: #e2e8f0; letter-spacing: 1px; }
 
-        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 12em; font-family: 'Share Tech Mono', monospace; color: #66fcf1; z-index: 50; pointer-events: none; text-shadow: 0 0 40px rgba(102, 252, 241, 0.8); display: none; }
+        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 15em; font-weight: 900; color: #fff; z-index: 50; pointer-events: none; text-shadow: 0 20px 50px rgba(0,0,0,0.5); display: none; }
         
-        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(11, 12, 16, 0.9); color: #fff; padding: 15px 30px; border-radius: 2px; border: 1px solid #45a29e; border-top: 4px solid #66fcf1; }
-        #place-display { font-size: 4em; font-weight: 700; color: #66fcf1; text-align: center; margin-top: -10px; font-family: 'Share Tech Mono', monospace; }
+        #leaderboard { position: absolute; top: 30px; right: 30px; z-index: 10; background: rgba(0, 0, 0, 0.5); color: #fff; padding: 20px 40px; border-radius: 16px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        #place-display { font-size: 4em; font-weight: 900; color: #fff; text-align: center; margin-top: -5px; line-height: 1; }
         
-        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(11, 12, 16, 0.9); color: #fff; padding: 15px 30px; border-radius: 2px; border: 1px solid #45a29e; border-top: 4px solid #66fcf1; font-family: 'Share Tech Mono', monospace; pointer-events: none; }
-        .stat { font-size: 2em; margin: 0; font-weight: 500; line-height: 1.2; letter-spacing: 1px; color: #c5c6c7; }
-        .stat span { color: #66fcf1; font-weight: 700; }
+        #dashboard { position: absolute; bottom: 30px; left: 30px; z-index: 10; background: rgba(0, 0, 0, 0.5); color: #fff; padding: 20px 40px; border-radius: 16px; font-family: 'Outfit', sans-serif; pointer-events: none; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .stat { font-size: 1.8em; margin: 0; font-weight: 500; letter-spacing: 1px; color: #a0aec0; }
+        .stat span { color: #fff; font-weight: 900; }
 
-        /* Post-Race Leaderboard */
-        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 5, 0.95); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(8px); }
-        #victory-card { background: #0b0c10; border: 2px solid #45a29e; padding: 40px 60px; border-radius: 4px; text-align: center; box-shadow: 0 0 50px rgba(69, 162, 158, 0.3); min-width: 550px; }
-        #victory-card h2 { font-family: 'Share Tech Mono', monospace; font-size: 4em; margin: 0; color: #66fcf1; text-transform: uppercase; text-shadow: 0 0 20px rgba(102, 252, 241, 0.4); }
-        #victory-place { font-size: 1.6em; margin: 10px 0 25px 0; color: #c5c6c7; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; }
+        /* Victory Overlay */
+        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(15px); }
+        #victory-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 50px 70px; border-radius: 24px; text-align: center; box-shadow: 0 40px 100px rgba(0,0,0,0.9); min-width: 600px; backdrop-filter: blur(20px); }
+        #victory-card h2 { font-size: 4em; margin: 0; color: #fff; text-transform: uppercase; font-weight: 900; letter-spacing: -1px; }
+        #victory-place { font-size: 1.2em; margin: 15px 0 30px 0; color: #a0aec0; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; }
         
-        #final-leaderboard-container { width: 100%; margin-bottom: 30px; }
-        .lb-row { display: flex; justify-content: space-between; padding: 12px 20px; background: #1f2833; margin-bottom: 4px; border-radius: 2px; font-size: 1.4em; font-weight: 700; align-items: center; border-left: 4px solid transparent; }
-        .lb-row.player-row { background: rgba(69, 162, 158, 0.2); border-left: 4px solid #66fcf1; }
-        .lb-rank { width: 40px; color: #c5c6c7; text-align: left; font-family: 'Share Tech Mono', monospace; }
-        .lb-name { flex-grow: 1; text-align: left; margin-left: 15px; letter-spacing: 1px; }
-        .lb-score { color: #fff; font-family: 'Share Tech Mono', monospace; }
+        #final-leaderboard-container { width: 100%; margin-bottom: 40px; }
+        .lb-row { display: flex; justify-content: space-between; padding: 15px 25px; background: rgba(0,0,0,0.4); margin-bottom: 8px; border-radius: 12px; font-size: 1.5em; font-weight: 800; align-items: center; border: 1px solid transparent; }
+        .lb-row.player-row { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); }
+        .lb-rank { width: 40px; color: #a0aec0; text-align: left; }
+        .lb-name { flex-grow: 1; text-align: left; margin-left: 20px; letter-spacing: 1px; }
+        .lb-score { color: #fff; }
 
-        .restart-btn { font-family: 'Share Tech Mono', monospace; background: #45a29e; color: #0b0c10; border: none; border-radius: 2px; padding: 15px 50px; font-weight: 700; cursor: pointer; font-size: 1.5em; text-transform: uppercase; transition: 0.2s; letter-spacing: 2px; }
-        .restart-btn:hover { background: #66fcf1; box-shadow: 0 0 20px rgba(102, 252, 241, 0.5); }
+        .restart-btn { background: #fff; color: #000; border: none; border-radius: 12px; padding: 20px 60px; font-weight: 900; cursor: pointer; font-size: 1.4em; text-transform: uppercase; transition: 0.3s; letter-spacing: 2px; font-family: 'Outfit', sans-serif; }
+        .restart-btn:hover { background: #e2e8f0; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255,255,255,0.2); }
         
         #confetti-canvas { position: absolute; top:0; left:0; width:100vw; height:100vh; z-index: 95; pointer-events: none; display: none; }
     </style>
@@ -88,38 +87,38 @@
 
     <div id="menu-overlay">
         <div class="menu-panel">
-            <h1 class="title-racer">MIDNIGHT CIRCUIT</h1>
-            <p class="subtitle">Pro Series Simulator</p>
+            <h1 class="title-racer">Grand Prix</h1>
+            <p class="subtitle">Ultimate Simulator</p>
             
             <input type="text" id="racer-name" class="name-input" placeholder="ENTER DRIVER ID" maxlength="14" autocomplete="off">
             
             <div class="btn-grid">
                 <div class="car-card" onclick="startRaceSimulation(0xe53e3e)">
-                    <div class="color-preview" style="background: #e53e3e; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                    <div class="color-preview" style="background: linear-gradient(135deg, #ff4b4b, #b91c1c);"></div>
                     <div class="car-name">Formula Red</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0xffaa00)">
-                    <div class="color-preview" style="background: #ffaa00; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                    <div class="color-preview" style="background: linear-gradient(135deg, #ffd000, #c27800);"></div>
                     <div class="car-name">Liquid Gold</div>
                 </div>
-                <div class="car-card" onclick="startRaceSimulation(0x0055ff)">
-                    <div class="color-preview" style="background: #0055ff; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                <div class="car-card" onclick="startRaceSimulation(0x0066ff)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #3388ff, #0033cc);"></div>
                     <div class="car-name">Cobalt Blue</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0x00ff66)">
-                    <div class="color-preview" style="background: #00ff66; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                    <div class="color-preview" style="background: linear-gradient(135deg, #33ff88, #009933);"></div>
                     <div class="car-name">Neon Viper</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0xff007f)">
-                    <div class="color-preview" style="background: #ff007f; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                    <div class="color-preview" style="background: linear-gradient(135deg, #ff3399, #99004d);"></div>
                     <div class="car-name">Cyber Pink</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0xff5500)">
-                    <div class="color-preview" style="background: #ff5500; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                    <div class="color-preview" style="background: linear-gradient(135deg, #ff7733, #b33c00);"></div>
                     <div class="car-name">Blaze Orange</div>
                 </div>
-                <div class="car-card" onclick="startRaceSimulation(0x111111)">
-                    <div class="color-preview" style="background: #111111; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); border-color: #333;"></div>
+                <div class="car-card" onclick="startRaceSimulation(0x1a1a1a)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #333333, #000000); border-color: #444;"></div>
                     <div class="car-name">Stealth Black</div>
                 </div>
             </div>
@@ -129,8 +128,8 @@
     <canvas id="confetti-canvas"></canvas>
     <div id="victory-screen">
         <div id="victory-card">
-            <h2>CONGRATULATIONS!</h2>
-            <div id="victory-place">OFFICIAL RACE RESULTS</div>
+            <h2>RACE COMPLETE</h2>
+            <div id="victory-place">OFFICIAL STANDINGS</div>
             <div id="final-leaderboard-container"></div>
             <button class="restart-btn" onclick="window.location.reload()">Return to Garage</button>
         </div>
@@ -139,7 +138,7 @@
     <div id="countdown-box">3</div>
 
     <div id="leaderboard">
-        <div style="font-size: 1.1em; text-transform: uppercase; font-weight: 700; color: #c5c6c7;">Position</div>
+        <div style="font-size: 1.2em; text-transform: uppercase; font-weight: 800; color: #a0aec0;">Position</div>
         <div id="place-display">--</div>
     </div>
 
@@ -151,24 +150,28 @@
     <div id="canvas-container"></div>
 
     <script>
-        // --- MASSIVE COMPLEX TRACK ---
+        // --- MASSIVELY EXTENDED TRACK (More lefts, rights, technical corners) ---
         const trackWaypoints = [
-            new THREE.Vector3(0, 0, 0),         // Start / Finish Line
-            new THREE.Vector3(0, 0, -300),      // Fast Front Straight
-            new THREE.Vector3(150, 0, -450),    // Sweeping Right
-            new THREE.Vector3(400, 0, -500),    // Hard Right
-            new THREE.Vector3(500, 0, -300),    // Short Straight
-            new THREE.Vector3(400, 0, -100),    // Left Hairpin curve
-            new THREE.Vector3(200, 0, 0),       // Right Chicane entry
-            new THREE.Vector3(100, 0, 150),     // Left Chicane exit
-            new THREE.Vector3(300, 0, 350),     // Deep Right Sweeper
-            new THREE.Vector3(0, 0, 500),       // Deep Left Sweeper
-            new THREE.Vector3(-200, 0, 400),    // Hard Left
-            new THREE.Vector3(-300, 0, 200),    // Short Straight Back
-            new THREE.Vector3(-100, 0, 100),    // Final Right leading to Grid
-            new THREE.Vector3(0, 0, 100)        // Pre-start grid area closure
+            new THREE.Vector3(0, 0, 0),         // Start Line
+            new THREE.Vector3(0, 0, -400),      // Fast Front Straight
+            new THREE.Vector3(200, 0, -600),    // Sweeping Right
+            new THREE.Vector3(500, 0, -600),    // Short Straight
+            new THREE.Vector3(700, 0, -400),    // Hard Right
+            new THREE.Vector3(600, 0, -100),    // Left hairpin entry
+            new THREE.Vector3(400, 0, -50),     // Left hairpin exit
+            new THREE.Vector3(400, 0, 200),     // Tech Straight
+            new THREE.Vector3(600, 0, 400),     // Right Sweeper
+            new THREE.Vector3(400, 0, 700),     // Hard Right 
+            new THREE.Vector3(100, 0, 600),     // Long Left Curve
+            new THREE.Vector3(-200, 0, 700),    // Right Sweeper
+            new THREE.Vector3(-500, 0, 500),    // Hard Left
+            new THREE.Vector3(-400, 0, 200),    // Back Straight
+            new THREE.Vector3(-600, 0, 0),      // Sharp Right Hairpin
+            new THREE.Vector3(-400, 0, -200),   // Hairpin exit
+            new THREE.Vector3(-200, 0, -100),   // Left Kink
+            new THREE.Vector3(0, 0, 100)        // Approach to start/finish
         ];
-        const trackWidth = 36;
+        const trackWidth = 38; // Slightly wider for massive pack
         let trackCurve;
         let physicsCurvePoints = []; 
 
@@ -178,20 +181,45 @@
         let raceStarted = false;
         let raceFinished = false;
         let finalPlayerRank = "--";
-        let playerNameStr = "PLAYER 1";
+        let playerNameStr = "PLAYER";
         
         const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
-        // 7 Unique AI Rivals to fill the 8-car grid
         const aiRivals = [
-            { color: 0xffaa00, name: "IGNITE" },
-            { color: 0x8e44ad, name: "PHANTOM" },
-            { color: 0x00ffff, name: "FROST" },
-            { color: 0x99ff00, name: "VENOM" },
-            { color: 0xff0055, name: "APEX" },
-            { color: 0xff5500, name: "PULSE" },
-            { color: 0x222222, name: "SHADOW" }
+            { color: 0xffaa00, name: "IGNITE", num: "77" },
+            { color: 0x8e44ad, name: "PHANTOM", num: "13" },
+            { color: 0x00ffff, name: "FROST", num: "04" },
+            { color: 0x99ff00, name: "VENOM", num: "99" },
+            { color: 0xff0055, name: "APEX", num: "21" },
+            { color: 0xff5500, name: "PULSE", num: "55" },
+            { color: 0x333333, name: "SHADOW", num: "00" }
         ];
+
+        // Generates the racing number decals for the roof
+        function createNumberPlane(number) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(64, 64, 60, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 75px "Outfit", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(number, 64, 70);
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            const mat = new THREE.MeshBasicMaterial({map: tex, transparent: true});
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.rotation.z = -Math.PI / 2; // Orient forward
+            mesh.position.y = 0.51; // Float just above car body
+            return mesh;
+        }
 
         function startRaceSimulation(chosenColor) {
             const inputName = document.getElementById('racer-name').value.trim().toUpperCase();
@@ -207,9 +235,9 @@
             
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x020205);
-            scene.fog = new THREE.FogExp2(0x020205, 0.0015); 
+            scene.fog = new THREE.FogExp2(0x020205, 0.0012); // Pushed back for larger track
 
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2500);
             clock = new THREE.Clock();
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -221,7 +249,8 @@
             scene.add(ambient);
 
             trackCurve = new THREE.CatmullRomCurve3(trackWaypoints, true);
-            physicsCurvePoints = trackCurve.getPoints(600);
+            // Increased to 1200 cache points to prevent glitching on massive track
+            physicsCurvePoints = trackCurve.getPoints(1200);
 
             buildSceneryAndTrack();
             spawnCustomRaceCars(playerColor);
@@ -230,7 +259,7 @@
             window.addEventListener('keyup', (e) => toggleControls(e, false));
             window.addEventListener('resize', handleWindowResize);
 
-            // INSTANT CAMERA LOCK: Ensures player sees car on grid before GO!
+            // INSTANT CAMERA LOCK
             const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
             camera.position.copy(playerCar.position.clone().add(cameraOffset));
             camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
@@ -241,19 +270,18 @@
         function buildSceneryAndTrack() {
             const starGeo = new THREE.BufferGeometry();
             const starCoords = [];
-            for(let i=0; i<800; i++) {
-                starCoords.push((Math.random()-0.5)*2000, Math.random()*400+50, (Math.random()-0.5)*2000);
+            for(let i=0; i<1200; i++) {
+                starCoords.push((Math.random()-0.5)*3000, Math.random()*500+50, (Math.random()-0.5)*3000);
             }
             starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
-            scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.0 })));
+            scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.2 })));
 
-            const trackGeo = new THREE.TubeGeometry(trackCurve, 500, trackWidth / 2, 8, true);
+            const trackGeo = new THREE.TubeGeometry(trackCurve, 800, trackWidth / 2, 8, true);
             const trackMat = new THREE.MeshStandardMaterial({ color: 0x11131a, roughness: 0.9, emissive: 0x020305 });
             const trackMesh = new THREE.Mesh(trackGeo, trackMat);
             trackMesh.scale.set(1, 0.002, 1); 
             scene.add(trackMesh);
 
-            // PERFECTLY CENTERED, HARDCODED CHECKERED FINISH LINE
             const flCanvas = document.createElement('canvas');
             flCanvas.width = 1024;
             flCanvas.height = 256;
@@ -281,20 +309,19 @@
             const flTex = new THREE.CanvasTexture(flCanvas);
             const flMat = new THREE.MeshBasicMaterial({ map: flTex, transparent: true });
             
-            // Hardcoded perfectly at Z=0 straightaway
-            const checkeredMesh = new THREE.Mesh(new THREE.PlaneGeometry(36, 10), flMat);
+            const checkeredMesh = new THREE.Mesh(new THREE.PlaneGeometry(38, 10), flMat);
             checkeredMesh.position.set(0, 0.05, 0); 
             checkeredMesh.rotation.x = -Math.PI / 2;
             scene.add(checkeredMesh);
 
-            const poleGeo = new THREE.CylinderGeometry(0.2, 0.3, 12);
-            const armGeo = new THREE.CylinderGeometry(0.15, 0.15, 5);
+            const poleGeo = new THREE.CylinderGeometry(0.2, 0.3, 14);
+            const armGeo = new THREE.CylinderGeometry(0.15, 0.15, 6);
             armGeo.rotateZ(Math.PI / 2);
             const poleMat = new THREE.MeshStandardMaterial({ color: 0x222 });
-            const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0x66fcf1 });
+            const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-            for (let i = 0; i < 50; i++) {
-                const t = i / 50;
+            for (let i = 0; i < 80; i++) {
+                const t = i / 80;
                 const trackPt = trackCurve.getPointAt(t);
                 const tangent = trackCurve.getTangentAt(t);
                 const normal = tangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
@@ -304,14 +331,14 @@
 
                 const streetLight = new THREE.Group();
                 const pole = new THREE.Mesh(poleGeo, poleMat);
-                pole.position.y = 6;
+                pole.position.y = 7;
                 const arm = new THREE.Mesh(armGeo, poleMat);
-                arm.position.set(-2.5, 12, 0);
-                const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8), lightGlowMat);
-                bulb.position.set(-5, 11.8, 0);
+                arm.position.set(-3, 14, 0);
+                const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 8), lightGlowMat);
+                bulb.position.set(-6, 13.8, 0);
 
-                const spot = new THREE.SpotLight(0xccffff, 12.0, 90, Math.PI / 2.5, 0.5, 0.8);
-                spot.position.set(-5, 11.8, 0);
+                const spot = new THREE.SpotLight(0xffffff, 14.0, 120, Math.PI / 2.5, 0.5, 0.8);
+                spot.position.set(-6, 13.8, 0);
                 spot.target.position.copy(trackPt);
                 scene.add(spot.target);
 
@@ -325,46 +352,46 @@
         }
 
         function buildTrackObstacles() {
-            const placements = [0.15, 0.35, 0.60, 0.85];
+            const placements = [0.12, 0.28, 0.45, 0.65, 0.82];
             
             placements.forEach((t, index) => {
                 const pos = trackCurve.getPointAt(t);
                 const tangent = trackCurve.getTangentAt(t);
                 const normal = tangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
                 
-                const sideShift = (index % 2 === 0) ? -6 : 6;
+                const sideShift = (index % 2 === 0) ? -7 : 7;
                 pos.addScaledVector(normal, sideShift);
                 pos.y = 0;
 
                 if (index % 2 === 0) {
                     const rampGroup = new THREE.Group();
-                    const rampGeo = new THREE.BoxGeometry(7, 1.6, 7);
+                    const rampGeo = new THREE.BoxGeometry(8, 1.8, 8);
                     const posAttr = rampGeo.attributes.position;
                     for(let i=0; i<posAttr.count; i++) {
-                        if(posAttr.getZ(i) > 0) posAttr.setY(i, posAttr.getY(i) - 0.8);
+                        if(posAttr.getZ(i) > 0) posAttr.setY(i, posAttr.getY(i) - 0.9);
                     }
                     rampGeo.computeVertexNormals();
 
-                    const rampMesh = new THREE.Mesh(rampGeo, new THREE.MeshStandardMaterial({ color: 0x45a29e, emissive: 0x0b1c1c }));
-                    rampMesh.position.y = 0.8;
+                    const rampMesh = new THREE.Mesh(rampGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x333333 }));
+                    rampMesh.position.y = 0.9;
                     rampGroup.add(rampMesh);
                     rampGroup.position.copy(pos);
                     rampGroup.lookAt(pos.clone().sub(tangent));
                     scene.add(rampGroup);
-                    obstacles.push({ type: 'ramp', position: pos.clone(), radius: 5.0 });
+                    obstacles.push({ type: 'ramp', position: pos.clone(), radius: 6.0 });
                 } else {
-                    const holeGeo = new THREE.CylinderGeometry(4.5, 4.5, 0.1, 16);
+                    const holeGeo = new THREE.CylinderGeometry(5.0, 5.0, 0.1, 16);
                     const holeMesh = new THREE.Mesh(holeGeo, new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true }));
                     holeMesh.position.copy(pos);
                     scene.add(holeMesh);
-                    obstacles.push({ type: 'pothole', position: pos.clone(), radius: 5.0 });
+                    obstacles.push({ type: 'pothole', position: pos.clone(), radius: 6.0 });
                 }
             });
         }
 
         // --- CORE VEHICLE PHYSICS ---
         class CustomRaceCar {
-            constructor(colorHex, isAI = false, label = "") {
+            constructor(colorHex, isAI = false, label = "", number = "01") {
                 this.isAI = isAI;
                 this.label = label;
                 this.colorHex = colorHex; 
@@ -378,7 +405,6 @@
                 this.aiOffset = isAI ? (Math.random() - 0.5) * 18 : 0; 
                 this.aiAggression = Math.random();
 
-                // Prevent instant win off start block
                 this.hasStarted = false;
                 this.hasHitCheckpoint25 = false;
                 this.hasHitCheckpoint50 = false;
@@ -388,11 +414,11 @@
                 this.velY = 0;
                 this.isGrounded = true;
 
-                this.acceleration = isAI ? 24.0 : 36.0; 
+                this.acceleration = isAI ? 25.0 : 38.0; 
                 this.drag = 0.92;
-                this.braking = 45.0;
-                this.steeringSensitivity = 3.6; 
-                this.maxSpeed = isAI ? 55.0 + (Math.random() * 8) : 65.0; 
+                this.braking = 50.0;
+                this.steeringSensitivity = 3.8; 
+                this.maxSpeed = isAI ? 58.0 + (Math.random() * 10) : 70.0; 
 
                 this.mesh = new THREE.Group();
                 const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.2 });
@@ -402,7 +428,11 @@
                 body.position.y = 0.25;
                 const spoiler = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.15, 0.8), trimMat);
                 spoiler.position.set(0, 1.4, -2.4);
-                this.mesh.add(body, spoiler);
+                
+                // Add the racing number decal to the roof
+                const numberDecal = createNumberPlane(number);
+                
+                this.mesh.add(body, spoiler, numberDecal);
 
                 const wheelGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.7, 12).rotateZ(Math.PI / 2);
                 const offsets = [[-1.35, 0.35, 1.7], [1.35, 0.35, 1.7], [-1.35, 0.35, -1.7], [1.35, 0.35, -1.7]];
@@ -416,7 +446,6 @@
             }
 
             updateVehiclePhysics(dt, controls) {
-                // Physics and steering only process if the race is active
                 if (raceStarted && !raceFinished) {
                     if (controls.steer !== 0) {
                         this.heading += controls.steer * this.steeringSensitivity * dt;
@@ -452,7 +481,6 @@
                     this.verifyCheckpointSecurityMetrics(prevProgress);
                 }
 
-                // Gravity ALWAYS processes, ensuring cars drop onto track immediately on load
                 if (!this.isGrounded) {
                     this.velY -= 22.0 * dt; 
                     this.posY += this.velY * dt;
@@ -463,7 +491,6 @@
                     }
                 }
 
-                // Mesh Sync ALWAYS processes, preventing the ghost-car bug at 0,0,0
                 this.mesh.position.copy(this.position);
                 this.mesh.position.y = this.posY;
                 this.mesh.rotation.y = this.heading;
@@ -486,7 +513,7 @@
                     if (flatCarPos.distanceTo(flatObsPos) < obs.radius) {
                         if (obs.type === 'ramp' && this.isGrounded) {
                             this.isGrounded = false;
-                            this.velY = 13.0; 
+                            this.velY = 14.0; 
                             this.speed += 8.0; 
                         } else if (obs.type === 'pothole' && this.isGrounded) {
                             this.speed *= 0.40;
@@ -496,7 +523,6 @@
             }
 
             verifyCheckpointSecurityMetrics(prevProgress) {
-                // Prevents instant lap complete trigger off the starting grid line
                 if (this.lapProgress > 0.1 && this.lapProgress < 0.2) this.hasStarted = true;
 
                 if (this.hasStarted) {
@@ -520,7 +546,7 @@
             calculateLapProgress() {
                 let nearestT = 0;
                 let minDist = Infinity;
-                const scans = 250; 
+                const scans = 350; // Increased scans for massively long track accuracy
                 for (let i = 0; i <= scans; i++) {
                     const testT = i / scans;
                     const trackPt = trackCurve.getPointAt(testT);
@@ -534,31 +560,24 @@
             }
         }
 
-        // --- PERFECT 8-CAR STAGGERED STARTING GRID ---
         function spawnCustomRaceCars(playerColor) {
-            playerCar = new CustomRaceCar(playerColor, false, playerNameStr);
-            playerCar.position.set(-6, 0.4, 20); // Pole Position (Front Left)
-            playerCar.heading = Math.PI; // Face directly down -Z straightaway
+            playerCar = new CustomRaceCar(playerColor, false, playerNameStr, "01");
+            playerCar.position.set(-6, 0.4, 20); 
+            playerCar.heading = Math.PI; 
 
             const startPositions = [
-                {x: 6, z: 20},  // 2nd Place
-                {x: -6, z: 40}, // 3rd Place
-                {x: 6, z: 40},  // 4th Place
-                {x: -6, z: 60}, // 5th Place
-                {x: 6, z: 60},  // 6th Place
-                {x: -6, z: 80}, // 7th Place
-                {x: 6, z: 80}   // 8th Place
+                {x: 6, z: 20},  {x: -6, z: 40}, {x: 6, z: 40}, 
+                {x: -6, z: 60}, {x: 6, z: 60},  {x: -6, z: 80}, {x: 6, z: 80}
             ];
 
             for (let i = 0; i < 7; i++) {
                 const aiData = aiRivals[i];
-                const ai = new CustomRaceCar(aiData.color, true, aiData.name);
+                const ai = new CustomRaceCar(aiData.color, true, aiData.name, aiData.num);
                 ai.position.set(startPositions[i].x, 0.4, startPositions[i].z);
                 ai.heading = Math.PI;
                 aiCars.push(ai);
             }
 
-            // Sync matrix positions immediately on frame 0 to prevent ghost cars
             playerCar.calculateLapProgress();
             playerCar.mesh.position.copy(playerCar.position);
             playerCar.mesh.rotation.y = playerCar.heading;
@@ -579,7 +598,7 @@
                 timerVal--;
                 if(timerVal === 0) {
                     box.innerText = "GO!";
-                    box.style.color = "#66fcf1";
+                    box.style.color = "#fff";
                     raceStarted = true;
                 } else if (timerVal < 0) {
                     clearInterval(interval);
@@ -602,7 +621,7 @@
         function runAIAutonomousLogic(car, dt) {
             if (!raceStarted) return; 
 
-            let lookaheadT = car.lapProgress + 0.018; 
+            let lookaheadT = car.lapProgress + 0.015; // Slightly reduced lookahead for sharper curves
             if (lookaheadT > 1.0) lookaheadT -= 1.0;
 
             const baseTarget = trackCurve.getPointAt(lookaheadT);
