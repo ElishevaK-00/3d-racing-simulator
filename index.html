@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Night Oval Racer - High Visibility Pro Edition</title>
+    <title>Ultimate 3D Night Racing - Pro Circuit</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #020208; user-select: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
         
-        #menu-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 12, 24, 0.95); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        #menu-overlay h1 { margin: 0 0 10px 0; font-size: 2.8em; color: #64ffda; text-transform: uppercase; letter-spacing: 2px; }
-        .color-btn { padding: 14px 28px; margin: 10px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 1em; transition: 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
-        .color-btn:hover { transform: scale(1.05); }
+        /* High-Energy Racing Menu */
+        #menu-overlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, rgba(10,20,40,0.95) 0%, rgba(0,0,5,0.98) 100%); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-bottom: 6px solid #64ffda; }
+        .title-racer { font-style: italic; font-size: 4.5em; margin: 0 0 5px 0; color: #ffffff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 4px 4px 0px #e53e3e, 8px 8px 0px #3182ce; transform: skewX(-10deg); }
+        .subtitle { color: #a8b2d1; margin-bottom: 30px; font-size: 1.3em; font-weight: 300; letter-spacing: 1px; }
         
-        #countdown-box { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 7em; font-weight: bold; color: #ff0055; z-index: 50; pointer-events: none; text-shadow: 0 0 25px rgba(255,0,85,0.7); display: none; font-family: monospace; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .color-btn { padding: 16px 32px; border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; font-weight: 800; cursor: pointer; font-size: 1.1em; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; transform: skewX(-10deg); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .color-btn:hover { transform: skewX(-10deg) scale(1.05); border-color: #fff; }
         
-        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(10, 25, 47, 0.9); color: #fff; padding: 12px 25px; border-radius: 8px; border: 2px solid #64ffda; }
-        #place-display { font-size: 2.5em; font-weight: bold; color: #64ffda; font-family: monospace; text-align: center; }
+        #countdown-box { position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%); font-size: 8em; font-style: italic; font-weight: 900; color: #ff0055; z-index: 50; pointer-events: none; text-shadow: 0 0 30px rgba(255,0,85,0.8); display: none; font-family: 'Segoe UI', sans-serif; }
         
-        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(10, 25, 47, 0.85); color: #64ffda; padding: 15px 25px; border-radius: 8px; border: 1px solid #172a45; font-family: monospace; pointer-events: none; }
-        .stat { font-size: 1.1em; margin: 3px 0; }
+        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(5, 15, 30, 0.9); color: #fff; padding: 15px 30px; border-radius: 8px; border-left: 4px solid #64ffda; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        #place-display { font-size: 3em; font-style: italic; font-weight: 900; color: #64ffda; text-align: center; margin-top: -5px; }
+        
+        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(5, 15, 30, 0.9); color: #64ffda; padding: 15px 25px; border-radius: 8px; border-left: 4px solid #e53e3e; font-family: monospace; pointer-events: none; }
+        .stat { font-size: 1.2em; margin: 5px 0; font-weight: bold; }
 
-        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 12, 24, 0.85); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(8px); }
-        #victory-card { background: #112240; border: 3px solid #64ffda; padding: 40px 60px; border-radius: 16px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-        #victory-card h2 { font-size: 3.5em; margin: 0; color: #ff007f; text-transform: uppercase; }
-        #victory-place { font-size: 2.5em; margin: 15px 0; color: #64ffda; font-weight: bold; }
-        .restart-btn { background: #64ffda; color: #0a192f; border: none; padding: 12px 30px; font-weight: bold; border-radius: 20px; cursor: pointer; margin-top: 15px; font-size: 1.1em; }
+        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 10, 20, 0.9); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(10px); }
+        #victory-card { background: #0a192f; border: 4px solid #64ffda; padding: 50px 80px; border-radius: 12px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); transform: skewX(-5deg); }
+        #victory-card h2 { font-size: 4em; font-style: italic; margin: 0; color: #ff007f; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,0,127,0.5); }
+        #victory-place { font-size: 3em; margin: 20px 0; color: #64ffda; font-weight: 900; }
+        .restart-btn { background: #64ffda; color: #0a192f; border: none; padding: 15px 40px; font-weight: 900; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 1.2em; text-transform: uppercase; transition: 0.2s; }
+        .restart-btn:hover { background: #fff; }
         
         #confetti-canvas { position: absolute; top:0; left:0; width:100vw; height:100vh; z-index: 95; pointer-events: none; display: none; }
     </style>
@@ -34,11 +39,11 @@
 <body>
 
     <div id="menu-overlay">
-        <h1>Night Shift: Oval Raceway</h1>
-        <p style="color: #8892b0; margin-bottom: 25px; font-size: 1.1em;">Select your racing color livery to enter the grid:</p>
-        <div>
+        <h1 class="title-racer">Pro Circuit Racing</h1>
+        <p class="subtitle">Select your team livery to enter the starting grid:</p>
+        <div class="btn-grid">
             <button class="color-btn" style="background: #e53e3e; color: white;" onclick="startRaceSimulation(0xe53e3e)">Formula Red</button>
-            <button class="color-btn" style="background: #d69e2e; color: white;" onclick="startRaceSimulation(0xd69e2e)">Liquid Gold</button>
+            <button class="color-btn" style="background: #0055ff; color: white;" onclick="startRaceSimulation(0x0055ff)">Cobalt Blue</button>
             <button class="color-btn" style="background: #00ff66; color: black;" onclick="startRaceSimulation(0x00ff66)">Neon Viper</button>
             <button class="color-btn" style="background: #ff007f; color: white;" onclick="startRaceSimulation(0xff007f)">Cyber Pink</button>
         </div>
@@ -47,8 +52,7 @@
     <canvas id="confetti-canvas"></canvas>
     <div id="victory-screen">
         <div id="victory-card">
-            <h2>🏆 RACE COMPLETE 🏆</h2>
-            <p style="font-size: 1.3em; margin: 10px 0 0; color: #ccd6f6;">You crossed the finish line!</p>
+            <h2>🏆 FINISH 🏆</h2>
             <div id="victory-place">FINAL STANDING: --</div>
             <button class="restart-btn" onclick="window.location.reload()">Race Again</button>
         </div>
@@ -57,31 +61,32 @@
     <div id="countdown-box">3</div>
 
     <div id="leaderboard">
-        <div style="font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; color: #8892b0;">Position</div>
+        <div style="font-size: 0.9em; text-transform: uppercase; letter-spacing: 2px; color: #8892b0; font-weight: bold;">Position</div>
         <div id="place-display">--</div>
     </div>
 
     <div id="dashboard">
-        <div class="stat">SPEED: <span id="speed-out">0.00</span> m/s</div>
-        <div class="stat">PROGRESS: <span id="pos-out">0%</span></div>
+        <div class="stat">SPEED: <span id="speed-out">0.00</span> MPH</div>
+        <div class="stat">DISTANCE: <span id="pos-out">0%</span></div>
     </div>
 
     <div id="canvas-container"></div>
 
     <script>
-        // --- CLEAN RACING OVAL CIRCUIT ---
+        // --- MASSIVE COMPLEX CIRCUIT (Longer, S-Curves, Hairpins) ---
         const trackWaypoints = [
-            new THREE.Vector3(0, 0, 120),       // Checkered Finish Line Baseline 
-            new THREE.Vector3(90, 0, 120),      // Turn 1 Entrance
-            new THREE.Vector3(150, 0, 70),      // Turn 1 Apex
-            new THREE.Vector3(150, 0, -70),     // Turn 2 Apex
-            new THREE.Vector3(90, 0, -120),     // Backstretch Straight
-            new THREE.Vector3(-90, 0, -120),    // Turn 3 Entrance
-            new THREE.Vector3(-150, 0, -70),    // Turn 3 Apex
-            new THREE.Vector3(-150, 0, 70),     // Turn 4 Apex
-            new THREE.Vector3(-90, 0, 120)      // Frontstretch Straightaway
+            new THREE.Vector3(-100, 0, 150),    // Pre-Start Straight
+            new THREE.Vector3(150, 0, 150),     // Turn 1 Sweeper
+            new THREE.Vector3(300, 0, 50),      // Turn 2 
+            new THREE.Vector3(300, 0, -200),    // Long High-Speed Backstretch
+            new THREE.Vector3(150, 0, -350),    // Hairpin Entrance
+            new THREE.Vector3(0, 0, -350),      // Hairpin Apex
+            new THREE.Vector3(-100, 0, -200),   // S-Curve 1
+            new THREE.Vector3(-250, 0, -100),   // S-Curve 2
+            new THREE.Vector3(-300, 0, 100),    // Final Wide Turn
+            new THREE.Vector3(-200, 0, 150)     // Return to Front Straight
         ];
-        const trackWidth = 32;
+        const trackWidth = 34;
         let trackCurve;
 
         let scene, camera, renderer, clock;
@@ -104,9 +109,9 @@
             
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x02020c);
-            scene.fog = new THREE.FogExp2(0x02020c, 0.002);
+            scene.fog = new THREE.FogExp2(0x02020c, 0.0018); // Lighter fog for a larger track
 
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1500);
             clock = new THREE.Clock();
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -126,56 +131,62 @@
             window.addEventListener('keyup', (e) => toggleControls(e, false));
             window.addEventListener('resize', handleWindowResize);
 
+            // INSTANT CAMERA LOCK: Forces camera behind car before frame 1 renders so it's ready for countdown
+            const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
+            camera.position.copy(playerCar.position.clone().add(cameraOffset));
+            camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
+
             animate();
         }
 
         function buildSceneryAndTrack() {
-            // Starfield Space
+            // Expanded Starfield
             const starGeo = new THREE.BufferGeometry();
             const starCoords = [];
-            for(let i=0; i<350; i++) {
-                starCoords.push((Math.random()-0.5)*900, Math.random()*250+40, (Math.random()-0.5)*900);
+            for(let i=0; i<600; i++) {
+                starCoords.push((Math.random()-0.5)*1500, Math.random()*300+40, (Math.random()-0.5)*1500);
             }
             starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
-            scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 })));
+            scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.9 })));
 
-            // Circuit Asphalt Surface Plane
-            const trackGeo = new THREE.TubeGeometry(trackCurve, 200, trackWidth / 2, 8, true);
+            // Circuit Asphalt
+            const trackGeo = new THREE.TubeGeometry(trackCurve, 400, trackWidth / 2, 8, true);
             const trackMat = new THREE.MeshStandardMaterial({ color: 0x1c1e24, roughness: 0.85, emissive: 0x040612 });
             const trackMesh = new THREE.Mesh(trackGeo, trackMat);
             trackMesh.scale.set(1, 0.002, 1); 
             scene.add(trackMesh);
 
-            // FIXED: Checkered Finish Line Strip horizontally cutting exactly across the Z=120 straightaway
+            // HORIZONTAL CHECKERED FINISH LINE (Across X=0)
             const checkeredGroup = new THREE.Group();
-            const sizeX = 1.2, sizeZ = 2.0;
-            for(let i = 0; i < 3; i++) {       // Narrow depth down X-axis
-                for(let j = 0; j < 16; j++) {  // Wide span across Z-axis
+            const sizeX = 2.0, sizeZ = 1.2;
+            for(let i = 0; i < 3; i++) {       
+                for(let j = 0; j < 18; j++) {  
                     const boxGeo = new THREE.PlaneGeometry(sizeX, sizeZ);
                     const isWhite = (i + j) % 2 === 0;
                     const mat = new THREE.MeshBasicMaterial({ color: isWhite ? 0xffffff : 0x010101, side: THREE.DoubleSide });
                     const tile = new THREE.Mesh(boxGeo, mat);
                     tile.rotation.x = Math.PI / 2;
-                    tile.position.set(0 + (i * sizeX), 0.05, 105.0 + (j * sizeZ)); // Centers on Z=120
+                    // Centered across Z axis spanning across road
+                    tile.position.set(-2.0 + (i * sizeX), 0.05, 134.0 + (j * sizeZ)); 
                     checkeredGroup.add(tile);
                 }
             }
             scene.add(checkeredGroup);
 
-            // HIGH-INTENSITY STREET POLES
+            // HIGH-INTENSITY STREET POLES (Spread out over massive track)
             const poleGeo = new THREE.CylinderGeometry(0.18, 0.25, 11);
             const armGeo = new THREE.CylinderGeometry(0.12, 0.12, 4);
             armGeo.rotateZ(Math.PI / 2);
             const poleMat = new THREE.MeshStandardMaterial({ color: 0x2d3748 });
             const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0xfff3cc });
 
-            for (let i = 0; i < 18; i++) {
-                const t = i / 18;
+            for (let i = 0; i < 40; i++) {
+                const t = i / 40;
                 const trackPt = trackCurve.getPointAt(t);
                 const tangent = trackCurve.getTangentAt(t);
                 const normal = tangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
                 
-                const polePos = trackPt.clone().addScaledVector(normal, (trackWidth / 2) + 3);
+                const polePos = trackPt.clone().addScaledVector(normal, (trackWidth / 2) + 4);
                 polePos.y = 0;
 
                 const streetLight = new THREE.Group();
@@ -188,7 +199,7 @@
                 const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 8), lightGlowMat);
                 bulb.position.set(-4, 10.8, 0);
 
-                const spot = new THREE.SpotLight(0xfff6cc, 9.0, 60, Math.PI / 3, 0.6, 0.8);
+                const spot = new THREE.SpotLight(0xfff6cc, 10.0, 70, Math.PI / 2.5, 0.5, 0.8);
                 spot.position.set(-4, 10.8, 0);
                 spot.target.position.copy(trackPt);
                 scene.add(spot.target);
@@ -203,14 +214,14 @@
         }
 
         function buildTrackObstacles() {
-            const placements = [0.2, 0.45, 0.7, 0.85];
+            const placements = [0.15, 0.35, 0.55, 0.70, 0.85];
             
             placements.forEach((t, index) => {
                 const pos = trackCurve.getPointAt(t);
                 const tangent = trackCurve.getTangentAt(t);
                 const normal = tangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
                 
-                const sideShift = (index % 2 === 0) ? -5 : 5;
+                const sideShift = (index % 2 === 0) ? -6 : 6;
                 pos.addScaledVector(normal, sideShift);
                 pos.y = 0;
 
@@ -219,7 +230,6 @@
                     const rampGeo = new THREE.BoxGeometry(6, 1.4, 6);
                     const posAttr = rampGeo.attributes.position;
                     for(let i=0; i<posAttr.count; i++) {
-                        // FIXED: Re-slanted wedge to face exactly oncoming traffic cleanly
                         if(posAttr.getZ(i) > 0) posAttr.setY(i, posAttr.getY(i) - 0.7);
                     }
                     rampGeo.computeVertexNormals();
@@ -228,18 +238,17 @@
                     rampMesh.position.y = 0.7;
                     rampGroup.add(rampMesh);
                     rampGroup.position.copy(pos);
-                    // Flips exactly 180 degrees to face correct traffic angle
                     rampGroup.lookAt(pos.clone().sub(tangent));
                     scene.add(rampGroup);
 
                     obstacles.push({ type: 'ramp', position: pos.clone(), radius: 4.5 });
                 } else {
-                    const holeGeo = new THREE.CylinderGeometry(3.5, 3.5, 0.1, 16);
+                    const holeGeo = new THREE.CylinderGeometry(4.0, 4.0, 0.1, 16);
                     const holeMesh = new THREE.Mesh(holeGeo, new THREE.MeshBasicMaterial({ color: 0xff3300, wireframe: true }));
                     holeMesh.position.copy(pos);
                     scene.add(holeMesh);
 
-                    obstacles.push({ type: 'pothole', position: pos.clone(), radius: 4.0 });
+                    obstacles.push({ type: 'pothole', position: pos.clone(), radius: 4.5 });
                 }
             });
         }
@@ -254,9 +263,12 @@
                 this.heading = 0;
                 this.speed = 0;
                 this.lapProgress = 0;
-                this.lapsCompleted = 0; // Total distance tracker for perfect Leaderboard sorting
+                this.lapsCompleted = 0; 
 
-                // FIXED: Bulletproof Directional Forward Checkpoint Anti-Cheat System
+                // AI Desync Variables to make them race uniquely
+                this.aiOffset = isAI ? (Math.random() - 0.5) * 14 : 0; // Naturally drift left/right on track
+                this.aiAggression = Math.random(); // Alters turning sharpness
+
                 this.hasHitCheckpoint25 = false;
                 this.hasHitCheckpoint50 = false;
                 this.hasHitCheckpoint75 = false;
@@ -265,11 +277,12 @@
                 this.velY = 0;
                 this.isGrounded = true;
 
-                this.acceleration = 26.0;
+                this.acceleration = isAI ? 22.0 : 32.0; // Player gets massive acceleration advantage
                 this.drag = 0.92;
-                this.braking = 36.0;
+                this.braking = 40.0;
                 this.steeringSensitivity = 3.4; 
-                this.maxSpeed = isAI ? 35.0 + (Math.random() * 4) : 48.0;
+                // AI Speeds Randomized. Player Top Speed Buffed to weave through pack.
+                this.maxSpeed = isAI ? 38.0 + (Math.random() * 8) : 60.0; 
 
                 this.mesh = new THREE.Group();
                 const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.2 });
@@ -293,6 +306,9 @@
             }
 
             updateVehiclePhysics(dt, controls) {
+                // Pre-Race Lockout: Do not allow physics calculation until GO!
+                if (!raceStarted && !raceFinished) return;
+
                 if (controls.steer !== 0) {
                     this.heading += controls.steer * this.steeringSensitivity * dt;
                 }
@@ -334,7 +350,7 @@
                 this.calculateLapProgress();
 
                 this.evaluateObstacleIntersections();
-                this.verifyCheckpointSecurityMetrics(); // Apply logic uniformly so AI doesn't break
+                this.verifyCheckpointSecurityMetrics();
             }
 
             checkCircuitContainment(provisionalPos) {
@@ -352,7 +368,7 @@
                     const distSq = provisionalPos.distanceToSquared(closest);
                     if (distSq < shortestDistSq) shortestDistSq = distSq;
                 }
-                return shortestDistSq <= (trackWidth * trackWidth) / 3.8;
+                return shortestDistSq <= (trackWidth * trackWidth) / 3.4;
             }
 
             evaluateObstacleIntersections() {
@@ -373,12 +389,10 @@
             }
 
             verifyCheckpointSecurityMetrics() {
-                // Mandatory forward sequential progression checkpoints
                 if (this.lapProgress > 0.23 && this.lapProgress < 0.35) this.hasHitCheckpoint25 = true;
                 if (this.lapProgress > 0.48 && this.lapProgress < 0.60 && this.hasHitCheckpoint25) this.hasHitCheckpoint50 = true;
                 if (this.lapProgress > 0.73 && this.lapProgress < 0.85 && this.hasHitCheckpoint50) this.hasHitCheckpoint75 = true;
 
-                // Detect official successful forward finish
                 if (this.lapProgress > 0.94 && this.lapProgress < 0.99 && this.hasHitCheckpoint75) {
                     this.lapsCompleted += 1;
                     this.hasHitCheckpoint25 = false; 
@@ -394,7 +408,7 @@
             calculateLapProgress() {
                 let nearestT = 0;
                 let minDist = Infinity;
-                const scans = 150;
+                const scans = 200; // High precision mapping
                 for (let i = 0; i <= scans; i++) {
                     const testT = i / scans;
                     const trackPt = trackCurve.getPointAt(testT);
@@ -410,15 +424,17 @@
 
         function spawnCustomRaceCars(playerColor) {
             playerCar = new CustomRaceCar(playerColor, false, "Player");
-            playerCar.position.set(0, 0.4, 120); 
-            playerCar.heading = Math.PI / 2; // Facing exactly +X direction
+            // Set Player directly behind finish line on the asphalt
+            playerCar.position.set(-25, 0.4, 150); 
+            playerCar.heading = Math.PI / 2; // Facing +X direction
 
-            const aiColors = [0xe28743, 0x8e44ad, 0x00ffff, 0xffaa00];
-            for (let i = 0; i < 4; i++) {
+            const aiColors = [0xe28743, 0x8e44ad, 0x00ffff, 0xffaa00, 0x99ff00];
+            for (let i = 0; i < 5; i++) {
                 const ai = new CustomRaceCar(aiColors[i], true, `AI_${i+1}`);
-                // FIXED: Spawn completely on the track (X axis negative, Z strictly 120 baseline)
-                ai.position.set(-15 - (i * 12), 0.4, 120 + (i % 2 === 0 ? 6 : -6));
+                // Stagger heavily backwards down the -X axis stretch
+                ai.position.set(-45 - (i * 15), 0.4, 150 + (i % 2 === 0 ? 6 : -6));
                 ai.heading = Math.PI / 2;
+                ai.lapProgress = 0.99 - (i * 0.01); // Pre-anchor their track loop math
                 aiCars.push(ai);
             }
         }
@@ -452,13 +468,19 @@
             }
         }
 
-        // --- FIXED SMART CARROT-ON-A-STICK FORWARD AI ---
+        // --- DYNAMIC DESYNCED AI PATHFINDING ---
         function runAIAutonomousLogic(car, dt) {
-            // Find exactly where the car is, and project target physically 3% ahead on the curve
-            let lookaheadT = car.lapProgress + 0.03; 
+            if (!raceStarted) return; // Prevent AI creep during countdown
+
+            let lookaheadT = car.lapProgress + 0.02; 
             if (lookaheadT > 1.0) lookaheadT -= 1.0;
 
-            const target = trackCurve.getPointAt(lookaheadT);
+            const baseTarget = trackCurve.getPointAt(lookaheadT);
+            const tangent = trackCurve.getTangentAt(lookaheadT);
+            const normal = tangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
+            
+            // Add natural lateral drifting to their targeting so they take unique racing lines
+            const target = baseTarget.clone().addScaledVector(normal, car.aiOffset);
 
             const desiredAngle = Math.atan2(target.x - car.position.x, target.z - car.position.z);
             let angularErr = desiredAngle - car.heading;
@@ -468,7 +490,9 @@
 
             let steerVal = 0;
             if (Math.abs(angularErr) > 0.05) steerVal = angularErr > 0 ? 1 : -1;
-            const curveDampener = Math.abs(angularErr) > 0.35 ? 0.6 : 1.0;
+            
+            // Varying dampening creates aggressive or safe AI drivers
+            const curveDampener = Math.abs(angularErr) > 0.3 ? (0.4 + car.aiAggression * 0.3) : 1.0;
 
             car.updateVehiclePhysics(dt, { gas: curveDampener, brake: 0, steer: steerVal });
         }
@@ -477,11 +501,10 @@
             if(!playerCar) return;
             let pack = [playerCar, ...aiCars];
             
-            // FIXED: Sort by total accumulated race distance to prevent position jumping on line-crosses
             pack.sort((a, b) => (b.lapsCompleted + b.lapProgress) - (a.lapsCompleted + a.lapProgress));
             
             const rank = pack.findIndex(c => c.label === "Player") + 1;
-            const suffix = ["ST", "ND", "RD", "TH", "TH"][rank - 1];
+            const suffix = ["ST", "ND", "RD", "TH", "TH", "TH"][rank - 1];
             const displayRank = rank + suffix;
             
             if(!raceFinished) {
@@ -509,7 +532,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            for(let i=0; i<120; i++) {
+            for(let i=0; i<150; i++) {
                 confettiPieces.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height - canvas.height,
@@ -555,7 +578,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-
             const dt = Math.min(clock.getDelta(), 0.1);
 
             const playerCommands = {
@@ -564,20 +586,20 @@
                 steer: (activeInputs.Left ? 1.0 : 0.0) - (activeInputs.Right ? 1.0 : 0.0)
             };
 
-            if (raceStarted && !raceFinished) {
-                playerCar.updateVehiclePhysics(dt, playerCommands);
-                aiCars.forEach(ai => ai.updateVehiclePhysics(dt, { gas: 0, brake: 0, steer: 0 })); 
-                aiCars.forEach(ai => runAIAutonomousLogic(ai, dt));
-                computeLeaderboardPositions();
-            }
+            // Physics Update Layer
+            if (playerCar) playerCar.updateVehiclePhysics(dt, playerCommands);
+            aiCars.forEach(ai => runAIAutonomousLogic(ai, dt));
+            
+            computeLeaderboardPositions();
 
+            // Camera Tracking Layer (Runs continuously so you can see your car pre-race)
             if (playerCar) {
                 const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
                 const targetCamPos = playerCar.position.clone().add(cameraOffset);
                 camera.position.lerp(targetCamPos, 0.12);
                 camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
 
-                document.getElementById('speed-out').innerText = playerCar.speed.toFixed(2);
+                document.getElementById('speed-out').innerText = Math.floor(playerCar.speed * 2.2); // Converted purely to standard MPH
             }
 
             renderer.render(scene, camera);
