@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midnight Circuit - Arcade Master</title>
+    <title>Midnight Madness Circuit - Arcade Master</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Orbitron:wght@400;700;900&display=swap');
         
@@ -98,7 +98,7 @@
 
     <div id="menu-overlay">
         <div class="title-container">
-            <h1 class="main-title">MIDNIGHT ARCADE</h1>
+            <h1 class="main-title">MIDNIGHT MADNESS</h1>
             <div class="sub-title">Ultimate 3D Racing</div>
         </div>
 
@@ -126,10 +126,10 @@
     <canvas id="confetti-canvas"></canvas>
     <div id="victory-screen">
         <div id="victory-card">
-            <h2>FINISH</h2>
+            <h2>CONGRATULATIONS!</h2>
             <div id="victory-place">OFFICIAL STANDINGS</div>
             <div id="final-leaderboard-container"></div>
-            <button class="restart-btn" onclick="window.location.reload()">PLAY AGAIN</button>
+            <button class="restart-btn" onclick="window.location.reload()"> CLICK HERE TO PLAY AGAIN</button>
         </div>
     </div>
 
@@ -179,23 +179,21 @@
         let finalPlayerRank = "--";
         let playerNameStr = "PLAYER 1";
         
-        // Cinematic Camera Variables
         let isCinematicMenu = true;
         let menuCamAngle = 0;
 
         const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
         const aiRivals = [
-            { color: 0xffaa00, name: "IGNITE", num: "77" },
+            { color: 0xffaa00, name: "IGNITE", num: "67" },
             { color: 0x8e44ad, name: "PHANTOM", num: "13" },
             { color: 0x00d2ff, name: "FROST", num: "04" },
             { color: 0x00ff66, name: "VENOM", num: "99" },
             { color: 0xff0055, name: "APEX", num: "21" },
-            { color: 0xff5500, name: "PULSE", num: "55" },
-            { color: 0x333333, name: "SHADOW", num: "00" }
+            { color: 0xff5500, name: "PULSE", num: "54" },
+            { color: 0x333333, name: "SHADOW", num: "36" }
         ];
 
-        // Roof Racing Numbers
         function createNumberPlane(number) {
             const canvas = document.createElement('canvas');
             canvas.width = 128; canvas.height = 128;
@@ -221,7 +219,6 @@
             return mesh;
         }
 
-        // Initialize immediately on page load for the cinematic background
         window.onload = function() {
             init3DWorld();
         };
@@ -245,11 +242,11 @@
             scene.add(ambient);
 
             trackCurve = new THREE.CatmullRomCurve3(trackWaypoints, true);
-            // 1500 points guarantees extreme precision for the clamping math
-            physicsCurvePoints = trackCurve.getPoints(1500); 
+            // Ultra-high definition points to provide mathematically perfect, smooth continuous vector projections
+            physicsCurvePoints = trackCurve.getPoints(2000); 
 
             buildSceneryAndTrack();
-            spawnCustomRaceCars(0xe53e3e); // Default Red
+            spawnCustomRaceCars(0xe53e3e); 
 
             window.addEventListener('keydown', (e) => toggleControls(e, true));
             window.addEventListener('keyup', (e) => toggleControls(e, false));
@@ -258,10 +255,8 @@
             animate();
         }
 
-        // Live Customization Feature
         function changePlayerColor(hexCode, element) {
             if (playerCar) {
-                // The body is the first child of the mesh group
                 playerCar.mesh.children[0].material.color.setHex(hexCode);
                 playerCar.colorHex = hexCode;
             }
@@ -271,16 +266,19 @@
         }
 
         function initiateRaceSequence() {
+            // FIX: Capturing name dynamically AND assigning it immediately to the active 3D vehicle
             const inputName = document.getElementById('racer-name').value.trim().toUpperCase();
-            if(inputName !== "") playerNameStr = inputName;
+            if(inputName !== "") {
+                playerNameStr = inputName;
+                if (playerCar) playerCar.label = playerNameStr; 
+            }
             
-            // Fade out menu, reveal HUD
             document.getElementById('menu-overlay').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('menu-overlay').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'block';
                 document.getElementById('leaderboard').style.display = 'block';
-                isCinematicMenu = false; // Snaps camera behind car
+                isCinematicMenu = false; 
                 triggerCountdown();
             }, 500);
         }
@@ -461,6 +459,41 @@
                 scene.add(this.mesh);
             }
 
+            // --- FLAWLESS VECTOR PROJECTION (ELIMINATES SHAKING) ---
+            getSmoothBoundaryPoint(pos) {
+                let totalPoints = physicsCurvePoints.length;
+                let centerIdx = Math.floor(this.lapProgress * totalPoints);
+                
+                let closestDistSq = Infinity;
+                let closestPt = new THREE.Vector3();
+
+                // Search exactly along the 60 3D line segments directly near the car
+                for (let offset = -30; offset <= 30; offset++) {
+                    let i = (centerIdx + offset + totalPoints) % totalPoints;
+                    let nextI = (i + 1) % totalPoints;
+                    
+                    let p1 = physicsCurvePoints[i];
+                    let p2 = physicsCurvePoints[nextI];
+                    
+                    let line = new THREE.Vector3().subVectors(p2, p1);
+                    let lenSq = line.lengthSq();
+                    let t = 0;
+                    if (lenSq !== 0) {
+                        let vec = new THREE.Vector3().subVectors(pos, p1);
+                        t = Math.max(0, Math.min(1, vec.dot(line) / lenSq));
+                    }
+                    // Project the car perfectly onto the segment line to find the mathematical ideal point
+                    let proj = new THREE.Vector3().copy(p1).add(line.multiplyScalar(t));
+                    
+                    let dSq = pos.distanceToSquared(proj);
+                    if (dSq < closestDistSq) {
+                        closestDistSq = dSq;
+                        closestPt.copy(proj);
+                    }
+                }
+                return { point: closestPt, distSq: closestDistSq };
+            }
+
             updateVehiclePhysics(dt, controls) {
                 if (raceStarted && !raceFinished) {
                     if (controls.steer !== 0) {
@@ -480,38 +513,24 @@
                     const nextPos = this.position.clone().addScaledVector(this.velocity, dt);
 
                     if (!this.isAI) {
-                        // --- FLAWLESS MATHEMATICAL CLAMPING FIX (No Shaking/Bouncing) ---
-                        let shortestDistSq = Infinity;
-                        let nearestPt = null;
+                        let boundary = this.getSmoothBoundaryPoint(nextPos);
+                        const maxAllowedDist = 16.5; 
                         
-                        // Find the absolute closest invisible track boundary point
-                        for (let i = 0; i < physicsCurvePoints.length; i++) {
-                            const pt = physicsCurvePoints[i];
-                            const distSq = nextPos.distanceToSquared(pt);
-                            if (distSq < shortestDistSq) {
-                                shortestDistSq = distSq;
-                                nearestPt = pt;
-                            }
-                        }
-
-                        // Track Width is 38. Radius is 19. Limit car to 17 units to keep tires on asphalt.
-                        const maxAllowedDist = 17.0; 
-                        
-                        if (shortestDistSq > maxAllowedDist * maxAllowedDist) {
-                            // If car tries to cross limit, mathematically force it exactly to the edge
-                            const pushOutDir = new THREE.Vector3().subVectors(nextPos, nearestPt);
+                        if (boundary.distSq > maxAllowedDist * maxAllowedDist) {
+                            // Car exceeded track math limit. Lock coordinates perfectly to the smooth line segment.
+                            let pushOutDir = new THREE.Vector3().subVectors(nextPos, boundary.point);
                             pushOutDir.y = 0; 
                             pushOutDir.normalize();
                             
-                            nextPos.copy(nearestPt).add(pushOutDir.multiplyScalar(maxAllowedDist));
+                            nextPos.copy(boundary.point).add(pushOutDir.multiplyScalar(maxAllowedDist));
                             
-                            // Apply friction for riding the wall, but NEVER reverse/bounce the velocity
-                            this.speed *= 0.94; 
+                            // Apply friction to scrub speed softly, without any bouncing or shaking math.
+                            this.speed *= 0.95; 
                         }
                         
                         this.position.copy(nextPos);
                     } else {
-                        this.position.copy(nextPos); // AI ignores bounds
+                        this.position.copy(nextPos);
                     }
                     
                     let prevProgress = this.lapProgress;
@@ -680,7 +699,10 @@
             
             pack.sort((a, b) => (b.lapsCompleted + b.lapProgress) - (a.lapsCompleted + a.lapProgress));
             
-            const rank = pack.findIndex(c => c.label === playerNameStr) + 1;
+            // FIX: Guaranteed positive valid rank calculation eliminates the NaN bug!
+            let foundIdx = pack.findIndex(c => c.label === playerNameStr);
+            let rank = (foundIdx !== -1) ? (foundIdx + 1) : 1; 
+            
             const suffix = ["ST", "ND", "RD", "TH", "TH", "TH", "TH", "TH"][rank - 1];
             const displayRank = rank + suffix;
             
@@ -778,12 +800,10 @@
             const dt = Math.min(clock.getDelta(), 0.1);
 
             if (isCinematicMenu) {
-                // Cinematic Menu Camera Sweep
                 menuCamAngle += 0.003;
                 camera.position.set(Math.sin(menuCamAngle) * 50, 20, 20 + Math.cos(menuCamAngle) * 40);
-                camera.lookAt(0, 0, 40); // Look at the grid
+                camera.lookAt(0, 0, 40); 
             } else {
-                // Active Race Physics & Logic
                 const playerCommands = {
                     gas: activeInputs.Forward ? 1.0 : 0.0,
                     brake: activeInputs.Backward ? 1.0 : 0.0,
@@ -795,11 +815,14 @@
                 
                 computeLeaderboardPositions();
 
-                // Snapped Follow Camera
                 if (playerCar) {
                     const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
                     const targetCamPos = playerCar.position.clone().add(cameraOffset);
-                    camera.position.lerp(targetCamPos, 0.12);
+                    
+                    // FIX: dt-dependent tracking prevents any visual micro-stuttering on high refresh-rate monitors
+                    const lerpFactor = Math.min(1.0, 10.0 * dt);
+                    camera.position.lerp(targetCamPos, lerpFactor);
+                    
                     camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
 
                     document.getElementById('speed-out').innerText = Math.floor(playerCar.speed * 2.2); 
