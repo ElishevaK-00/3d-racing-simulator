@@ -5,78 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Midnight Circuit - Pro Edition</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,800;0,900;1,900&family=Rajdhani:wght@500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
         
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background-color: #020205; user-select: none; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background-color: #050505; user-select: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
         
-        /* Modern Console Racing Menu */
+        /* eSports Simulator Menu Redesign */
         #menu-overlay { 
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background: linear-gradient(135deg, rgba(5,8,15,0.95) 0%, rgba(0,0,0,0.98) 100%);
+            background-color: #0b0c10;
+            background-image: radial-gradient(#1f2833 1px, transparent 1px);
+            background-size: 30px 30px;
             z-index: 100; display: flex; align-items: center; justify-content: center; color: white;
             box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
         }
         
         .menu-panel {
-            background: rgba(10, 15, 25, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-top: 4px solid #3182ce;
+            background: #0b0c10;
+            border: 2px solid #45a29e;
             padding: 50px;
-            border-radius: 12px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 4px;
+            box-shadow: 0 0 40px rgba(69, 162, 158, 0.2), inset 0 0 20px rgba(69, 162, 158, 0.1);
             text-align: center;
-            max-width: 800px;
+            max-width: 900px;
         }
 
         .title-racer { 
-            font-family: 'Montserrat', sans-serif; font-size: 5em; margin: 0; color: #ffffff; 
-            text-transform: uppercase; font-style: italic; font-weight: 900; letter-spacing: 2px; line-height: 1;
+            font-family: 'Share Tech Mono', monospace; font-size: 5em; margin: 0; color: #66fcf1; 
+            text-transform: uppercase; letter-spacing: 2px; line-height: 1;
+            text-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
         }
-        .subtitle { color: #3182ce; margin: 5px 0 30px 0; font-size: 1.2em; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; }
+        .subtitle { color: #c5c6c7; margin: 10px 0 40px 0; font-size: 1.3em; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; }
         
         .name-input { 
-            background: rgba(0,0,0,0.5); border: 2px solid #4a5568; color: #fff; border-radius: 4px;
-            padding: 15px 20px; font-size: 1.5em; font-family: 'Rajdhani', sans-serif; font-weight: 700;
-            text-align: center; outline: none; width: 80%; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
-            margin-bottom: 30px;
+            background: #1f2833; border: 2px solid #45a29e; color: #66fcf1; border-radius: 2px;
+            padding: 15px 20px; font-size: 1.6em; font-family: 'Share Tech Mono', monospace;
+            text-align: center; outline: none; width: 70%; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
+            margin-bottom: 40px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
-        .name-input:focus { border-color: #3182ce; box-shadow: 0 0 15px rgba(49,130,206,0.4); }
-        .name-input::placeholder { color: #4a5568; font-weight: 500; }
+        .name-input:focus { background: #0b0c10; box-shadow: 0 0 15px rgba(102, 252, 241, 0.4); }
+        .name-input::placeholder { color: #45a29e; opacity: 0.5; }
 
-        .btn-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+        .btn-grid { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
         .car-card {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
-            padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; width: 120px;
+            background: #1f2833; border: 2px solid #1f2833;
+            padding: 12px; border-radius: 2px; cursor: pointer; transition: 0.2s; width: 110px;
         }
-        .car-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.08); border-color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        .color-preview { height: 40px; border-radius: 4px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.2); }
-        .car-name { font-size: 1em; font-weight: 700; text-transform: uppercase; color: #cbd5e0; }
+        .car-card:hover { transform: translateY(-4px); border-color: #66fcf1; background: #0b0c10; box-shadow: 0 8px 15px rgba(0,0,0,0.6); }
+        .color-preview { height: 45px; border-radius: 2px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .car-name { font-size: 1.1em; font-weight: 700; text-transform: uppercase; color: #c5c6c7; line-height: 1.1; }
 
-        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 12em; font-style: italic; font-weight: 900; color: #fff; z-index: 50; pointer-events: none; text-shadow: 0 0 30px #ff0055, 4px 4px 0 #ff0055; display: none; font-family: 'Montserrat', sans-serif; }
+        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 12em; font-family: 'Share Tech Mono', monospace; color: #66fcf1; z-index: 50; pointer-events: none; text-shadow: 0 0 40px rgba(102, 252, 241, 0.8); display: none; }
         
-        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(5, 8, 12, 0.9); color: #fff; padding: 15px 30px; border-radius: 6px; border-left: 3px solid #64ffda; backdrop-filter: blur(5px); }
-        #place-display { font-size: 3.5em; font-weight: 900; font-style: italic; color: #64ffda; text-align: center; margin-top: -10px; font-family: 'Montserrat', sans-serif; }
+        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(11, 12, 16, 0.9); color: #fff; padding: 15px 30px; border-radius: 2px; border: 1px solid #45a29e; border-top: 4px solid #66fcf1; }
+        #place-display { font-size: 4em; font-weight: 700; color: #66fcf1; text-align: center; margin-top: -10px; font-family: 'Share Tech Mono', monospace; }
         
-        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(5, 8, 12, 0.9); color: #fff; padding: 15px 30px; border-radius: 6px; border-left: 3px solid #3182ce; font-family: 'Montserrat', sans-serif; font-style: italic; pointer-events: none; backdrop-filter: blur(5px); }
-        .stat { font-size: 2em; margin: 0; font-weight: 800; line-height: 1.2; letter-spacing: 1px; }
+        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(11, 12, 16, 0.9); color: #fff; padding: 15px 30px; border-radius: 2px; border: 1px solid #45a29e; border-top: 4px solid #66fcf1; font-family: 'Share Tech Mono', monospace; pointer-events: none; }
+        .stat { font-size: 2em; margin: 0; font-weight: 500; line-height: 1.2; letter-spacing: 1px; color: #c5c6c7; }
+        .stat span { color: #66fcf1; font-weight: 700; }
 
-        /* Victory Overlay & Post-Race Leaderboard */
-        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(10px); }
-        #victory-card { background: #0a0f1a; border: 2px solid #3182ce; padding: 40px 60px; border-radius: 8px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); min-width: 500px; }
-        #victory-card h2 { font-family: 'Montserrat', sans-serif; font-style: italic; font-size: 4.5em; margin: 0; color: #64ffda; text-transform: uppercase; font-weight: 900; line-height: 1; }
-        #victory-place { font-family: 'Rajdhani', sans-serif; font-size: 1.5em; margin: 5px 0 20px 0; color: #a8b2d1; font-weight: 700; letter-spacing: 2px; }
+        /* Post-Race Leaderboard */
+        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(5, 5, 5, 0.95); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(8px); }
+        #victory-card { background: #0b0c10; border: 2px solid #45a29e; padding: 40px 60px; border-radius: 4px; text-align: center; box-shadow: 0 0 50px rgba(69, 162, 158, 0.3); min-width: 550px; }
+        #victory-card h2 { font-family: 'Share Tech Mono', monospace; font-size: 4em; margin: 0; color: #66fcf1; text-transform: uppercase; text-shadow: 0 0 20px rgba(102, 252, 241, 0.4); }
+        #victory-place { font-size: 1.6em; margin: 10px 0 25px 0; color: #c5c6c7; font-weight: 600; letter-spacing: 4px; text-transform: uppercase; }
         
-        #final-leaderboard-container { width: 100%; margin-bottom: 25px; }
-        .lb-row { display: flex; justify-content: space-between; padding: 10px 20px; background: rgba(255,255,255,0.05); margin-bottom: 6px; border-radius: 4px; font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700; align-items: center; }
-        .lb-row.player-row { background: rgba(49,130,206,0.2); border: 1px solid #3182ce; }
-        .lb-rank { width: 40px; color: #8892b0; text-align: left; }
+        #final-leaderboard-container { width: 100%; margin-bottom: 30px; }
+        .lb-row { display: flex; justify-content: space-between; padding: 12px 20px; background: #1f2833; margin-bottom: 4px; border-radius: 2px; font-size: 1.4em; font-weight: 700; align-items: center; border-left: 4px solid transparent; }
+        .lb-row.player-row { background: rgba(69, 162, 158, 0.2); border-left: 4px solid #66fcf1; }
+        .lb-rank { width: 40px; color: #c5c6c7; text-align: left; font-family: 'Share Tech Mono', monospace; }
         .lb-name { flex-grow: 1; text-align: left; margin-left: 15px; letter-spacing: 1px; }
-        .lb-score { color: #fff; }
+        .lb-score { color: #fff; font-family: 'Share Tech Mono', monospace; }
 
-        .restart-btn { font-family: 'Rajdhani', sans-serif; background: #3182ce; color: #fff; border: none; border-radius: 4px; padding: 12px 40px; font-weight: 700; cursor: pointer; font-size: 1.3em; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
-        .restart-btn:hover { background: #64ffda; color: #000; box-shadow: 0 5px 15px rgba(100,255,218,0.4); }
+        .restart-btn { font-family: 'Share Tech Mono', monospace; background: #45a29e; color: #0b0c10; border: none; border-radius: 2px; padding: 15px 50px; font-weight: 700; cursor: pointer; font-size: 1.5em; text-transform: uppercase; transition: 0.2s; letter-spacing: 2px; }
+        .restart-btn:hover { background: #66fcf1; box-shadow: 0 0 20px rgba(102, 252, 241, 0.5); }
         
         #confetti-canvas { position: absolute; top:0; left:0; width:100vw; height:100vh; z-index: 95; pointer-events: none; display: none; }
     </style>
@@ -87,31 +89,38 @@
     <div id="menu-overlay">
         <div class="menu-panel">
             <h1 class="title-racer">MIDNIGHT CIRCUIT</h1>
-            <p class="subtitle">Official Racing Simulator</p>
+            <p class="subtitle">Pro Series Simulator</p>
             
-            <input type="text" id="racer-name" class="name-input" placeholder="ENTER DRIVER NAME" maxlength="14" autocomplete="off">
+            <input type="text" id="racer-name" class="name-input" placeholder="ENTER DRIVER ID" maxlength="14" autocomplete="off">
             
-            <div style="color: #a8b2d1; font-size: 1em; font-weight: 700; margin-bottom: 15px; letter-spacing: 2px;">SELECT TEAM LIVERY TO ENTER GRID</div>
             <div class="btn-grid">
                 <div class="car-card" onclick="startRaceSimulation(0xe53e3e)">
-                    <div class="color-preview" style="background: #e53e3e; box-shadow: 0 0 10px #e53e3e;"></div>
+                    <div class="color-preview" style="background: #e53e3e; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
                     <div class="car-name">Formula Red</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0xffaa00)">
-                    <div class="color-preview" style="background: #ffaa00; box-shadow: 0 0 10px #ffaa00;"></div>
+                    <div class="color-preview" style="background: #ffaa00; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
                     <div class="car-name">Liquid Gold</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0x0055ff)">
-                    <div class="color-preview" style="background: #0055ff; box-shadow: 0 0 10px #0055ff;"></div>
+                    <div class="color-preview" style="background: #0055ff; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
                     <div class="car-name">Cobalt Blue</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0x00ff66)">
-                    <div class="color-preview" style="background: #00ff66; box-shadow: 0 0 10px #00ff66;"></div>
+                    <div class="color-preview" style="background: #00ff66; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
                     <div class="car-name">Neon Viper</div>
                 </div>
                 <div class="car-card" onclick="startRaceSimulation(0xff007f)">
-                    <div class="color-preview" style="background: #ff007f; box-shadow: 0 0 10px #ff007f;"></div>
+                    <div class="color-preview" style="background: #ff007f; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
                     <div class="car-name">Cyber Pink</div>
+                </div>
+                <div class="car-card" onclick="startRaceSimulation(0xff5500)">
+                    <div class="color-preview" style="background: #ff5500; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);"></div>
+                    <div class="car-name">Blaze Orange</div>
+                </div>
+                <div class="car-card" onclick="startRaceSimulation(0x111111)">
+                    <div class="color-preview" style="background: #111111; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); border-color: #333;"></div>
+                    <div class="car-name">Stealth Black</div>
                 </div>
             </div>
         </div>
@@ -123,14 +132,14 @@
             <h2>CONGRATULATIONS!</h2>
             <div id="victory-place">OFFICIAL RACE RESULTS</div>
             <div id="final-leaderboard-container"></div>
-            <button class="restart-btn" onclick="window.location.reload()">Race Again</button>
+            <button class="restart-btn" onclick="window.location.reload()">Return to Garage</button>
         </div>
     </div>
 
     <div id="countdown-box">3</div>
 
     <div id="leaderboard">
-        <div style="font-size: 1.1em; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; font-weight: 700;">Position</div>
+        <div style="font-size: 1.1em; text-transform: uppercase; font-weight: 700; color: #c5c6c7;">Position</div>
         <div id="place-display">--</div>
     </div>
 
@@ -169,16 +178,19 @@
         let raceStarted = false;
         let raceFinished = false;
         let finalPlayerRank = "--";
-        let playerNameStr = "PLAYER";
+        let playerNameStr = "PLAYER 1";
         
         const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
+        // 7 Unique AI Rivals to fill the 8-car grid
         const aiRivals = [
             { color: 0xffaa00, name: "IGNITE" },
             { color: 0x8e44ad, name: "PHANTOM" },
             { color: 0x00ffff, name: "FROST" },
             { color: 0x99ff00, name: "VENOM" },
-            { color: 0xff0055, name: "APEX" }
+            { color: 0xff0055, name: "APEX" },
+            { color: 0xff5500, name: "PULSE" },
+            { color: 0x222222, name: "SHADOW" }
         ];
 
         function startRaceSimulation(chosenColor) {
@@ -194,8 +206,8 @@
             const container = document.getElementById('canvas-container');
             
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x02020a);
-            scene.fog = new THREE.FogExp2(0x02020a, 0.0015); 
+            scene.background = new THREE.Color(0x020205);
+            scene.fog = new THREE.FogExp2(0x020205, 0.0015); 
 
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
             clock = new THREE.Clock();
@@ -236,7 +248,7 @@
             scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.0 })));
 
             const trackGeo = new THREE.TubeGeometry(trackCurve, 500, trackWidth / 2, 8, true);
-            const trackMat = new THREE.MeshStandardMaterial({ color: 0x151822, roughness: 0.9, emissive: 0x02030a });
+            const trackMat = new THREE.MeshStandardMaterial({ color: 0x11131a, roughness: 0.9, emissive: 0x020305 });
             const trackMesh = new THREE.Mesh(trackGeo, trackMat);
             trackMesh.scale.set(1, 0.002, 1); 
             scene.add(trackMesh);
@@ -255,14 +267,14 @@
             }
 
             const fadeLeft = ctx.createLinearGradient(0, 0, 250, 0);
-            fadeLeft.addColorStop(0, '#151822');
-            fadeLeft.addColorStop(1, 'rgba(21, 24, 34, 0)');
+            fadeLeft.addColorStop(0, '#11131a');
+            fadeLeft.addColorStop(1, 'rgba(17, 19, 26, 0)');
             ctx.fillStyle = fadeLeft;
             ctx.fillRect(0, 0, 250, 256);
 
             const fadeRight = ctx.createLinearGradient(774, 0, 1024, 0);
-            fadeRight.addColorStop(0, 'rgba(21, 24, 34, 0)');
-            fadeRight.addColorStop(1, '#151822');
+            fadeRight.addColorStop(0, 'rgba(17, 19, 26, 0)');
+            fadeRight.addColorStop(1, '#11131a');
             ctx.fillStyle = fadeRight;
             ctx.fillRect(774, 0, 250, 256);
 
@@ -279,7 +291,7 @@
             const armGeo = new THREE.CylinderGeometry(0.15, 0.15, 5);
             armGeo.rotateZ(Math.PI / 2);
             const poleMat = new THREE.MeshStandardMaterial({ color: 0x222 });
-            const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0xffffee });
+            const lightGlowMat = new THREE.MeshBasicMaterial({ color: 0x66fcf1 });
 
             for (let i = 0; i < 50; i++) {
                 const t = i / 50;
@@ -298,7 +310,7 @@
                 const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8), lightGlowMat);
                 bulb.position.set(-5, 11.8, 0);
 
-                const spot = new THREE.SpotLight(0xfff6cc, 12.0, 90, Math.PI / 2.5, 0.5, 0.8);
+                const spot = new THREE.SpotLight(0xccffff, 12.0, 90, Math.PI / 2.5, 0.5, 0.8);
                 spot.position.set(-5, 11.8, 0);
                 spot.target.position.copy(trackPt);
                 scene.add(spot.target);
@@ -333,7 +345,7 @@
                     }
                     rampGeo.computeVertexNormals();
 
-                    const rampMesh = new THREE.Mesh(rampGeo, new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x003322 }));
+                    const rampMesh = new THREE.Mesh(rampGeo, new THREE.MeshStandardMaterial({ color: 0x45a29e, emissive: 0x0b1c1c }));
                     rampMesh.position.y = 0.8;
                     rampGroup.add(rampMesh);
                     rampGroup.position.copy(pos);
@@ -342,7 +354,7 @@
                     obstacles.push({ type: 'ramp', position: pos.clone(), radius: 5.0 });
                 } else {
                     const holeGeo = new THREE.CylinderGeometry(4.5, 4.5, 0.1, 16);
-                    const holeMesh = new THREE.Mesh(holeGeo, new THREE.MeshBasicMaterial({ color: 0xff3300, wireframe: true }));
+                    const holeMesh = new THREE.Mesh(holeGeo, new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true }));
                     holeMesh.position.copy(pos);
                     scene.add(holeMesh);
                     obstacles.push({ type: 'pothole', position: pos.clone(), radius: 5.0 });
@@ -404,36 +416,43 @@
             }
 
             updateVehiclePhysics(dt, controls) {
-                if (!raceStarted && !raceFinished) return;
-
-                if (controls.steer !== 0) {
-                    this.heading += controls.steer * this.steeringSensitivity * dt;
-                }
-
-                if (controls.gas > 0) {
-                    this.speed += this.acceleration * controls.gas * dt;
-                } else if (controls.brake > 0) {
-                    this.speed -= this.braking * controls.brake * dt;
-                } else {
-                    this.speed *= Math.pow(this.drag, dt * 10);
-                }
-
-                this.speed = THREE.MathUtils.clamp(this.speed, -8.0, this.maxSpeed);
-                this.velocity.set(Math.sin(this.heading) * this.speed, 0, Math.cos(this.heading) * this.speed);
-                const nextPos = this.position.clone().addScaledVector(this.velocity, dt);
-
-                if (!this.isAI) {
-                    if (this.checkCircuitContainment(nextPos)) {
-                        this.position.copy(nextPos);
-                    } else {
-                        this.speed *= -0.5; 
-                        this.heading += Math.PI * 0.05 * (controls.steer >= 0 ? -1 : 1); 
-                        this.position.addScaledVector(this.velocity, -dt * 0.4);
+                // Physics and steering only process if the race is active
+                if (raceStarted && !raceFinished) {
+                    if (controls.steer !== 0) {
+                        this.heading += controls.steer * this.steeringSensitivity * dt;
                     }
-                } else {
-                    this.position.copy(nextPos);
+
+                    if (controls.gas > 0) {
+                        this.speed += this.acceleration * controls.gas * dt;
+                    } else if (controls.brake > 0) {
+                        this.speed -= this.braking * controls.brake * dt;
+                    } else {
+                        this.speed *= Math.pow(this.drag, dt * 10);
+                    }
+
+                    this.speed = THREE.MathUtils.clamp(this.speed, -8.0, this.maxSpeed);
+                    this.velocity.set(Math.sin(this.heading) * this.speed, 0, Math.cos(this.heading) * this.speed);
+                    const nextPos = this.position.clone().addScaledVector(this.velocity, dt);
+
+                    if (!this.isAI) {
+                        if (this.checkCircuitContainment(nextPos)) {
+                            this.position.copy(nextPos);
+                        } else {
+                            this.speed *= -0.5; 
+                            this.heading += Math.PI * 0.05 * (controls.steer >= 0 ? -1 : 1); 
+                            this.position.addScaledVector(this.velocity, -dt * 0.4);
+                        }
+                    } else {
+                        this.position.copy(nextPos);
+                    }
+                    
+                    let prevProgress = this.lapProgress;
+                    this.calculateLapProgress();
+                    this.evaluateObstacleIntersections();
+                    this.verifyCheckpointSecurityMetrics(prevProgress);
                 }
 
+                // Gravity ALWAYS processes, ensuring cars drop onto track immediately on load
                 if (!this.isGrounded) {
                     this.velY -= 22.0 * dt; 
                     this.posY += this.velY * dt;
@@ -444,14 +463,10 @@
                     }
                 }
 
+                // Mesh Sync ALWAYS processes, preventing the ghost-car bug at 0,0,0
                 this.mesh.position.copy(this.position);
                 this.mesh.position.y = this.posY;
                 this.mesh.rotation.y = this.heading;
-
-                let prevProgress = this.lapProgress;
-                this.calculateLapProgress();
-                this.evaluateObstacleIntersections();
-                this.verifyCheckpointSecurityMetrics(prevProgress);
             }
 
             checkCircuitContainment(provisionalPos) {
@@ -519,7 +534,7 @@
             }
         }
 
-        // PERFECT 2x3 STAGGERED STARTING GRID
+        // --- PERFECT 8-CAR STAGGERED STARTING GRID ---
         function spawnCustomRaceCars(playerColor) {
             playerCar = new CustomRaceCar(playerColor, false, playerNameStr);
             playerCar.position.set(-6, 0.4, 20); // Pole Position (Front Left)
@@ -530,10 +545,12 @@
                 {x: -6, z: 40}, // 3rd Place
                 {x: 6, z: 40},  // 4th Place
                 {x: -6, z: 60}, // 5th Place
-                {x: 6, z: 60}   // 6th Place
+                {x: 6, z: 60},  // 6th Place
+                {x: -6, z: 80}, // 7th Place
+                {x: 6, z: 80}   // 8th Place
             ];
 
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 7; i++) {
                 const aiData = aiRivals[i];
                 const ai = new CustomRaceCar(aiData.color, true, aiData.name);
                 ai.position.set(startPositions[i].x, 0.4, startPositions[i].z);
@@ -541,9 +558,16 @@
                 aiCars.push(ai);
             }
 
-            // Sync matrix positions immediately so Leaderboard doesn't glitch on frame 1
+            // Sync matrix positions immediately on frame 0 to prevent ghost cars
             playerCar.calculateLapProgress();
-            aiCars.forEach(ai => ai.calculateLapProgress());
+            playerCar.mesh.position.copy(playerCar.position);
+            playerCar.mesh.rotation.y = playerCar.heading;
+            
+            aiCars.forEach(ai => {
+                ai.calculateLapProgress();
+                ai.mesh.position.copy(ai.position);
+                ai.mesh.rotation.y = ai.heading;
+            });
         }
 
         function triggerCountdown() {
@@ -555,7 +579,7 @@
                 timerVal--;
                 if(timerVal === 0) {
                     box.innerText = "GO!";
-                    box.style.color = "#64ffda";
+                    box.style.color = "#66fcf1";
                     raceStarted = true;
                 } else if (timerVal < 0) {
                     clearInterval(interval);
@@ -608,7 +632,7 @@
             pack.sort((a, b) => (b.lapsCompleted + b.lapProgress) - (a.lapsCompleted + a.lapProgress));
             
             const rank = pack.findIndex(c => c.label === playerNameStr) + 1;
-            const suffix = ["ST", "ND", "RD", "TH", "TH", "TH"][rank - 1];
+            const suffix = ["ST", "ND", "RD", "TH", "TH", "TH", "TH", "TH"][rank - 1];
             const displayRank = rank + suffix;
             
             if(!raceFinished) {
@@ -627,7 +651,7 @@
             
             let lbHTML = "";
             finalPack.forEach((car, index) => {
-                let suffix = ["ST", "ND", "RD", "TH", "TH", "TH"][index];
+                let suffix = ["ST", "ND", "RD", "TH", "TH", "TH", "TH", "TH"][index];
                 let rankStr = (index + 1) + suffix;
                 let colorHex = "#" + car.colorHex.toString(16).padStart(6, '0');
                 
