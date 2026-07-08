@@ -119,7 +119,7 @@
                 <div class="color-swatch" style="background: #ffffff;" onclick="changePlayerColor(0xffffff, this)"></div>
             </div>
 
-            <button class="start-btn" onclick="initiateRaceSequence()">START ENGINE</button>
+            <button class="start-btn" onclick="initiateRaceSequence()">START YOUR ENGINE</button>
         </div>
     </div>
 
@@ -127,9 +127,9 @@
     <div id="victory-screen">
         <div id="victory-card">
             <h2>CONGRATULATIONS!</h2>
-            <div id="victory-place">OFFICIAL STANDINGS</div>
+            <div id="victory-place">LEADERBOARD</div>
             <div id="final-leaderboard-container"></div>
-            <button class="restart-btn" onclick="window.location.reload()"> CLICK HERE TO PLAY AGAIN</button>
+            <button class="restart-btn" onclick="window.location.reload()">PRESS HERE TO PLAY AGAIN</button>
         </div>
     </div>
 
@@ -242,7 +242,6 @@
             scene.add(ambient);
 
             trackCurve = new THREE.CatmullRomCurve3(trackWaypoints, true);
-            // Ultra-high definition points to provide mathematically perfect, smooth continuous vector projections
             physicsCurvePoints = trackCurve.getPoints(2000); 
 
             buildSceneryAndTrack();
@@ -266,7 +265,6 @@
         }
 
         function initiateRaceSequence() {
-            // FIX: Capturing name dynamically AND assigning it immediately to the active 3D vehicle
             const inputName = document.getElementById('racer-name').value.trim().toUpperCase();
             if(inputName !== "") {
                 playerNameStr = inputName;
@@ -459,7 +457,6 @@
                 scene.add(this.mesh);
             }
 
-            // --- FLAWLESS VECTOR PROJECTION (ELIMINATES SHAKING) ---
             getSmoothBoundaryPoint(pos) {
                 let totalPoints = physicsCurvePoints.length;
                 let centerIdx = Math.floor(this.lapProgress * totalPoints);
@@ -467,7 +464,6 @@
                 let closestDistSq = Infinity;
                 let closestPt = new THREE.Vector3();
 
-                // Search exactly along the 60 3D line segments directly near the car
                 for (let offset = -30; offset <= 30; offset++) {
                     let i = (centerIdx + offset + totalPoints) % totalPoints;
                     let nextI = (i + 1) % totalPoints;
@@ -482,7 +478,6 @@
                         let vec = new THREE.Vector3().subVectors(pos, p1);
                         t = Math.max(0, Math.min(1, vec.dot(line) / lenSq));
                     }
-                    // Project the car perfectly onto the segment line to find the mathematical ideal point
                     let proj = new THREE.Vector3().copy(p1).add(line.multiplyScalar(t));
                     
                     let dSq = pos.distanceToSquared(proj);
@@ -517,14 +512,16 @@
                         const maxAllowedDist = 16.5; 
                         
                         if (boundary.distSq > maxAllowedDist * maxAllowedDist) {
-                            // Car exceeded track math limit. Lock coordinates perfectly to the smooth line segment.
                             let pushOutDir = new THREE.Vector3().subVectors(nextPos, boundary.point);
                             pushOutDir.y = 0; 
+                            
+                            // FIX: Critical mathematical safeguard against the "Spinning in the Middle" NaN error
+                            if (pushOutDir.lengthSq() < 0.0001) {
+                                pushOutDir.set(Math.random(), 0, Math.random());
+                            }
+                            
                             pushOutDir.normalize();
-                            
                             nextPos.copy(boundary.point).add(pushOutDir.multiplyScalar(maxAllowedDist));
-                            
-                            // Apply friction to scrub speed softly, without any bouncing or shaking math.
                             this.speed *= 0.95; 
                         }
                         
@@ -534,7 +531,7 @@
                     }
                     
                     let prevProgress = this.lapProgress;
-                    this.calculateLapProgress();
+                    this.calculateLapProgress(false); // Only use localized scanning while driving
                     this.evaluateObstacleIntersections();
                     this.verifyCheckpointSecurityMetrics(prevProgress);
                 }
@@ -592,17 +589,34 @@
                 }
             }
 
-            calculateLapProgress() {
-                let nearestT = 0;
+            // FIX: Uses absolute global scanning on initialization, but strict localized scanning while driving to prevent the Teleport Shortcut glitch
+            calculateLapProgress(isInit = false) {
+                let nearestT = this.lapProgress;
                 let minDist = Infinity;
-                const scans = 300; 
-                for (let i = 0; i <= scans; i++) {
-                    const testT = i / scans;
-                    const trackPt = trackCurve.getPointAt(testT);
-                    const d = this.position.distanceToSquared(trackPt);
-                    if (d < minDist) {
-                        minDist = d;
-                        nearestT = testT;
+                
+                if (isInit) {
+                    const scans = 300; 
+                    for (let i = 0; i <= scans; i++) {
+                        const testT = i / scans;
+                        const trackPt = trackCurve.getPointAt(testT);
+                        const d = this.position.distanceToSquared(trackPt);
+                        if (d < minDist) {
+                            minDist = d;
+                            nearestT = testT;
+                        }
+                    }
+                } else {
+                    for (let offset = -15; offset <= 15; offset++) {
+                        let testT = this.lapProgress + (offset / 1000);
+                        if (testT < 0) testT += 1.0;
+                        if (testT > 1.0) testT -= 1.0;
+                        
+                        const trackPt = trackCurve.getPointAt(testT);
+                        const d = this.position.distanceToSquared(trackPt);
+                        if (d < minDist) {
+                            minDist = d;
+                            nearestT = testT;
+                        }
                     }
                 }
                 this.lapProgress = nearestT;
@@ -627,12 +641,12 @@
                 aiCars.push(ai);
             }
 
-            playerCar.calculateLapProgress();
+            playerCar.calculateLapProgress(true);
             playerCar.mesh.position.copy(playerCar.position);
             playerCar.mesh.rotation.y = playerCar.heading;
             
             aiCars.forEach(ai => {
-                ai.calculateLapProgress();
+                ai.calculateLapProgress(true);
                 ai.mesh.position.copy(ai.position);
                 ai.mesh.rotation.y = ai.heading;
             });
@@ -699,7 +713,6 @@
             
             pack.sort((a, b) => (b.lapsCompleted + b.lapProgress) - (a.lapsCompleted + a.lapProgress));
             
-            // FIX: Guaranteed positive valid rank calculation eliminates the NaN bug!
             let foundIdx = pack.findIndex(c => c.label === playerNameStr);
             let rank = (foundIdx !== -1) ? (foundIdx + 1) : 1; 
             
@@ -819,7 +832,6 @@
                     const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
                     const targetCamPos = playerCar.position.clone().add(cameraOffset);
                     
-                    // FIX: dt-dependent tracking prevents any visual micro-stuttering on high refresh-rate monitors
                     const lerpFactor = Math.min(1.0, 10.0 * dt);
                     camera.position.lerp(targetCamPos, lerpFactor);
                     
