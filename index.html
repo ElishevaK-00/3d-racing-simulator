@@ -3,51 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Pro Circuit Racer</title>
+    <title>Midnight Circuit - Pro Edition</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Rajdhani:wght@500;700&display=swap');
         
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background-color: #020208; user-select: none; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background-color: #020208; user-select: none; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
         
-        /* High-Octane Arcade Racing Menu */
+        /* Sleek, Modern AAA Racing Menu */
         #menu-overlay { 
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; 
-            background: repeating-linear-gradient(45deg, #0a0a1a, #0a0a1a 30px, #111122 30px, #111122 60px);
+            background: radial-gradient(circle at bottom right, #111a2e 0%, #05070a 100%);
             z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
-            box-shadow: inset 0 0 150px rgba(0,0,0,0.9);
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
         }
         .title-racer { 
-            font-family: 'Teko', sans-serif; font-size: 8em; margin: 0 0 -10px 0; color: #ffcc00; 
-            text-transform: uppercase; font-style: italic; line-height: 1;
-            text-shadow: 4px 4px 0px #e53e3e, 8px 8px 0px #000; transform: skewX(-10deg); 
+            font-family: 'Teko', sans-serif; font-size: 7em; margin: 0; color: #ffffff; 
+            text-transform: uppercase; font-weight: 700; letter-spacing: 6px; line-height: 1;
+            text-shadow: 0px 0px 20px rgba(100,255,218,0.4);
         }
-        .subtitle { color: #fff; margin-bottom: 40px; font-size: 1.5em; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; background: #e53e3e; padding: 5px 20px; transform: skewX(-10deg); box-shadow: 4px 4px 0 #000; }
+        .subtitle { color: #64ffda; margin: 5px 0 35px 0; font-size: 1.4em; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
         
-        .btn-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
-        .color-btn { 
-            padding: 15px 35px; border: 4px solid #fff; border-radius: 0px; font-weight: 900; 
-            cursor: pointer; font-size: 1.3em; transition: 0.2s; text-transform: uppercase; 
-            letter-spacing: 1px; transform: skewX(-10deg); box-shadow: 6px 6px 0 rgba(0,0,0,0.8);
-            font-family: 'Teko', sans-serif;
+        .profile-setup { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.03); padding: 30px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px; backdrop-filter: blur(10px); }
+        .name-input { 
+            background: rgba(0,0,0,0.6); border: 2px solid #3182ce; color: #fff; border-radius: 6px;
+            padding: 12px 20px; font-size: 1.5em; font-family: 'Rajdhani', sans-serif; font-weight: 700;
+            text-align: center; outline: none; width: 350px; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
         }
-        .color-btn:hover { transform: skewX(-10deg) translate(-4px, -4px); box-shadow: 10px 10px 0 rgba(0,0,0,0.8); }
-        
-        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 12em; font-weight: 900; color: #fff; z-index: 50; pointer-events: none; text-shadow: 6px 6px 0px #ff0055, 0 0 40px #ff0055; display: none; font-family: 'Teko', sans-serif; font-style: italic; }
-        
-        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(0, 0, 0, 0.8); color: #fff; padding: 15px 30px; border: 4px solid #fff; box-shadow: 5px 5px 0 #ff0055; transform: skewX(-10deg); }
-        #place-display { font-size: 4em; font-weight: 900; color: #ffcc00; text-align: center; margin-top: -10px; font-family: 'Teko', sans-serif; font-style: italic; text-shadow: 2px 2px 0 #000; }
-        
-        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(0, 0, 0, 0.8); color: #fff; padding: 15px 30px; border: 4px solid #fff; box-shadow: 5px 5px 0 #0055ff; font-family: 'Teko', sans-serif; pointer-events: none; transform: skewX(-10deg); }
-        .stat { font-size: 2em; margin: 0; font-weight: bold; line-height: 1.2; letter-spacing: 1px; }
+        .name-input:focus { border-color: #64ffda; box-shadow: 0 0 15px rgba(100,255,218,0.3); }
+        .name-input::placeholder { color: #4a5568; }
 
-        /* Victory Overlay */
-        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
-        #victory-card { background: #111; border: 6px solid #ffcc00; padding: 50px 80px; text-align: center; box-shadow: 15px 15px 0 #e53e3e; transform: skewX(-5deg); }
-        #victory-card h2 { font-family: 'Teko', sans-serif; font-size: 6em; margin: 0; color: #fff; text-transform: uppercase; text-shadow: 4px 4px 0 #0055ff; font-style: italic; line-height: 1; }
-        #victory-place { font-family: 'Teko', sans-serif; font-size: 4em; margin: 10px 0; color: #ffcc00; font-weight: 900; text-shadow: 2px 2px 0 #000; }
-        .restart-btn { font-family: 'Teko', sans-serif; background: #fff; color: #000; border: 4px solid #000; padding: 10px 40px; font-weight: 900; cursor: pointer; margin-top: 20px; font-size: 2em; text-transform: uppercase; transition: 0.2s; box-shadow: 5px 5px 0 #0055ff; }
-        .restart-btn:hover { background: #ffcc00; transform: translate(-3px, -3px); box-shadow: 8px 8px 0 #0055ff; }
+        .btn-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 900px; }
+        .color-btn { 
+            padding: 12px 25px; border: 2px solid transparent; border-radius: 6px; font-weight: 700; 
+            cursor: pointer; font-size: 1.2em; transition: 0.3s; text-transform: uppercase; 
+            letter-spacing: 1px; font-family: 'Rajdhani', sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .color-btn:hover { transform: translateY(-3px); border-color: #fff; box-shadow: 0 8px 20px rgba(255,255,255,0.2); }
+        
+        #countdown-box { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 12em; font-weight: 700; color: #fff; z-index: 50; pointer-events: none; text-shadow: 0 0 40px #ff0055, 0 0 10px #ff0055; display: none; font-family: 'Teko', sans-serif; }
+        
+        #leaderboard { position: absolute; top: 20px; right: 20px; z-index: 10; background: rgba(5, 7, 12, 0.85); color: #fff; padding: 15px 30px; border-radius: 8px; border-left: 4px solid #64ffda; backdrop-filter: blur(5px); }
+        #place-display { font-size: 3.5em; font-weight: 700; color: #64ffda; text-align: center; margin-top: -10px; font-family: 'Teko', sans-serif; }
+        
+        #dashboard { position: absolute; bottom: 20px; left: 20px; z-index: 10; background: rgba(5, 7, 12, 0.85); color: #fff; padding: 15px 30px; border-radius: 8px; border-left: 4px solid #3182ce; font-family: 'Teko', sans-serif; pointer-events: none; backdrop-filter: blur(5px); }
+        .stat { font-size: 2em; margin: 0; font-weight: 500; line-height: 1.2; letter-spacing: 1px; }
+
+        /* Victory Overlay & Post-Race Leaderboard */
+        #victory-screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 4, 8, 0.9); z-index: 90; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(8px); }
+        #victory-card { background: #0a0f1a; border: 2px solid #3182ce; padding: 40px 60px; border-radius: 12px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); min-width: 500px; }
+        #victory-card h2 { font-family: 'Teko', sans-serif; font-size: 5em; margin: 0; color: #64ffda; text-transform: uppercase; text-shadow: 0 0 20px rgba(100,255,218,0.3); font-weight: 700; line-height: 1; }
+        #victory-place { font-family: 'Rajdhani', sans-serif; font-size: 1.5em; margin: 5px 0 20px 0; color: #a8b2d1; font-weight: 500; letter-spacing: 2px; }
+        
+        #final-leaderboard-container { width: 100%; margin-bottom: 25px; }
+        .lb-row { display: flex; justify-content: space-between; padding: 10px 20px; background: rgba(255,255,255,0.05); margin-bottom: 6px; border-radius: 6px; font-family: 'Rajdhani', sans-serif; font-size: 1.4em; font-weight: 700; align-items: center; }
+        .lb-row.player-row { background: rgba(100,255,218,0.15); border: 1px solid rgba(100,255,218,0.4); }
+        .lb-rank { width: 40px; color: #8892b0; text-align: left; }
+        .lb-name { flex-grow: 1; text-align: left; margin-left: 15px; letter-spacing: 1px; }
+        .lb-score { color: #fff; }
+
+        .restart-btn { font-family: 'Rajdhani', sans-serif; background: #3182ce; color: #fff; border: none; border-radius: 6px; padding: 12px 40px; font-weight: 700; cursor: pointer; font-size: 1.3em; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .restart-btn:hover { background: #64ffda; color: #000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(100,255,218,0.4); }
         
         #confetti-canvas { position: absolute; top:0; left:0; width:100vw; height:100vh; z-index: 95; pointer-events: none; display: none; }
     </style>
@@ -57,13 +73,18 @@
 
     <div id="menu-overlay">
         <h1 class="title-racer">MIDNIGHT CIRCUIT</h1>
-        <p class="subtitle">Select your vehicle livery to enter the grid</p>
-        <div class="btn-grid">
-            <button class="color-btn" style="background: #e53e3e; color: white;" onclick="startRaceSimulation(0xe53e3e)">Formula Red</button>
-            <button class="color-btn" style="background: #ffaa00; color: #000;" onclick="startRaceSimulation(0xffaa00)">Liquid Gold</button>
-            <button class="color-btn" style="background: #0055ff; color: white;" onclick="startRaceSimulation(0x0055ff)">Cobalt Blue</button>
-            <button class="color-btn" style="background: #00ff66; color: black;" onclick="startRaceSimulation(0x00ff66)">Neon Viper</button>
-            <button class="color-btn" style="background: #ff007f; color: white;" onclick="startRaceSimulation(0xff007f)">Cyber Pink</button>
+        <p class="subtitle">Official Pro Series Qualifier</p>
+        
+        <div class="profile-setup">
+            <input type="text" id="racer-name" class="name-input" placeholder="ENTER DRIVER NAME" maxlength="14" autocomplete="off">
+            <div style="color: #8892b0; font-size: 1.1em; font-weight: 500; margin-bottom: 15px;">SELECT TEAM LIVERY TO ENTER GRID</div>
+            <div class="btn-grid">
+                <button class="color-btn" style="background: #e53e3e; color: white;" onclick="startRaceSimulation(0xe53e3e)">Formula Red</button>
+                <button class="color-btn" style="background: #ffaa00; color: #000;" onclick="startRaceSimulation(0xffaa00)">Liquid Gold</button>
+                <button class="color-btn" style="background: #0055ff; color: white;" onclick="startRaceSimulation(0x0055ff)">Cobalt Blue</button>
+                <button class="color-btn" style="background: #00ff66; color: black;" onclick="startRaceSimulation(0x00ff66)">Neon Viper</button>
+                <button class="color-btn" style="background: #ff007f; color: white;" onclick="startRaceSimulation(0xff007f)">Cyber Pink</button>
+            </div>
         </div>
     </div>
 
@@ -71,7 +92,8 @@
     <div id="victory-screen">
         <div id="victory-card">
             <h2>CONGRATULATIONS!</h2>
-            <div id="victory-place">FINAL STANDING: --</div>
+            <div id="victory-place">OFFICIAL RACE RESULTS</div>
+            <div id="final-leaderboard-container"></div>
             <button class="restart-btn" onclick="window.location.reload()">Race Again</button>
         </div>
     </div>
@@ -79,7 +101,7 @@
     <div id="countdown-box">3</div>
 
     <div id="leaderboard">
-        <div style="font-size: 1.2em; text-transform: uppercase; font-family: 'Teko', sans-serif;">Position</div>
+        <div style="font-size: 1.3em; text-transform: uppercase; font-family: 'Teko', sans-serif;">Position</div>
         <div id="place-display">--</div>
     </div>
 
@@ -109,7 +131,7 @@
         ];
         const trackWidth = 36;
         let trackCurve;
-        let physicsCurvePoints = []; // Stores high-res track nodes to prevent physics glitching
+        let physicsCurvePoints = []; 
 
         let scene, camera, renderer, clock;
         let playerCar, aiCars = [];
@@ -117,10 +139,23 @@
         let raceStarted = false;
         let raceFinished = false;
         let finalPlayerRank = "--";
+        let playerNameStr = "PLAYER";
         
         const activeInputs = { Forward: false, Backward: false, Left: false, Right: false };
 
+        // Pre-defined AI Rivals
+        const aiRivals = [
+            { color: 0xffaa00, name: "IGNITE" },
+            { color: 0x8e44ad, name: "PHANTOM" },
+            { color: 0x00ffff, name: "FROST" },
+            { color: 0x99ff00, name: "VENOM" },
+            { color: 0xff0055, name: "APEX" }
+        ];
+
         function startRaceSimulation(chosenColor) {
+            const inputName = document.getElementById('racer-name').value.trim().toUpperCase();
+            if(inputName !== "") playerNameStr = inputName;
+            
             document.getElementById('menu-overlay').style.display = 'none';
             init(chosenColor);
             triggerCountdown();
@@ -145,7 +180,6 @@
             scene.add(ambient);
 
             trackCurve = new THREE.CatmullRomCurve3(trackWaypoints, true);
-            // Cache 600 high-resolution points purely for flawless physics boundary checks
             physicsCurvePoints = trackCurve.getPoints(600);
 
             buildSceneryAndTrack();
@@ -155,7 +189,7 @@
             window.addEventListener('keyup', (e) => toggleControls(e, false));
             window.addEventListener('resize', handleWindowResize);
 
-            // INSTANT CAMERA LOCK TO PREVENT INVISIBILITY BUG
+            // INSTANT CAMERA LOCK
             const cameraOffset = new THREE.Vector3(-Math.sin(playerCar.heading) * 16, 6.2, -Math.cos(playerCar.heading) * 16);
             camera.position.copy(playerCar.position.clone().add(cameraOffset));
             camera.lookAt(playerCar.position.clone().add(new THREE.Vector3(0, 0.8, 3)));
@@ -164,7 +198,6 @@
         }
 
         function buildSceneryAndTrack() {
-            // Expanded Starfield
             const starGeo = new THREE.BufferGeometry();
             const starCoords = [];
             for(let i=0; i<800; i++) {
@@ -180,27 +213,48 @@
             trackMesh.scale.set(1, 0.002, 1); 
             scene.add(trackMesh);
 
-            // PROCEDURAL FINISH LINE (Snaps exactly to Curve T=0)
-            const startPt = trackCurve.getPointAt(0);
-            const startTangent = trackCurve.getTangentAt(0);
-            const checkeredGroup = new THREE.Group();
-            const sizeX = 2.0, sizeZ = 2.0;
-            
-            for(let i = 0; i < 4; i++) {       
-                for(let j = 0; j < 18; j++) {  
-                    const boxGeo = new THREE.PlaneGeometry(sizeX, sizeZ);
-                    const isWhite = (i + j) % 2 === 0;
-                    const mat = new THREE.MeshBasicMaterial({ color: isWhite ? 0xffffff : 0x010101, side: THREE.DoubleSide });
-                    const tile = new THREE.Mesh(boxGeo, mat);
-                    tile.rotation.x = Math.PI / 2;
-                    tile.position.set(-17.0 + (j * sizeZ), 0.05, -3.0 + (i * sizeX)); 
-                    checkeredGroup.add(tile);
+            // --- PERFECTLY BLENDED CANVAS FINISH LINE ---
+            const flCanvas = document.createElement('canvas');
+            flCanvas.width = 1024;
+            flCanvas.height = 256;
+            const ctx = flCanvas.getContext('2d');
+
+            // Draw Checkers in the middle
+            for(let i=0; i<32; i++) {
+                for(let j=0; j<8; j++) {
+                    ctx.fillStyle = (i+j)%2 === 0 ? '#ffffff' : '#050505';
+                    ctx.fillRect(i*32, j*32, 32, 32);
                 }
             }
-            // Align the finish line perfectly with the start vector
-            checkeredGroup.position.copy(startPt);
-            checkeredGroup.lookAt(startPt.clone().add(startTangent));
-            scene.add(checkeredGroup);
+
+            // Radial gradient fades on left and right edges to blend perfectly into asphalt shadow
+            const fadeLeft = ctx.createLinearGradient(0, 0, 250, 0);
+            fadeLeft.addColorStop(0, '#151822');
+            fadeLeft.addColorStop(1, 'rgba(21, 24, 34, 0)');
+            ctx.fillStyle = fadeLeft;
+            ctx.fillRect(0, 0, 250, 256);
+
+            const fadeRight = ctx.createLinearGradient(774, 0, 1024, 0);
+            fadeRight.addColorStop(0, 'rgba(21, 24, 34, 0)');
+            fadeRight.addColorStop(1, '#151822');
+            ctx.fillStyle = fadeRight;
+            ctx.fillRect(774, 0, 250, 256);
+
+            const flTex = new THREE.CanvasTexture(flCanvas);
+            const flMat = new THREE.MeshBasicMaterial({ map: flTex, transparent: true });
+            
+            // Map exact dimension to fit across track width neatly
+            const checkeredMesh = new THREE.Mesh(new THREE.PlaneGeometry(36, 9), flMat);
+            
+            const startPt = trackCurve.getPointAt(0);
+            const startTangent = trackCurve.getTangentAt(0);
+            const startAngle = Math.atan2(startTangent.x, startTangent.z);
+            
+            checkeredMesh.position.copy(startPt);
+            checkeredMesh.position.y = 0.05; // Hover over asphalt
+            checkeredMesh.rotation.x = -Math.PI / 2;
+            checkeredMesh.rotation.z = -startAngle;
+            scene.add(checkeredMesh);
 
             // HIGH-INTENSITY STREET LIGHTS
             const poleGeo = new THREE.CylinderGeometry(0.2, 0.3, 12);
@@ -280,9 +334,10 @@
 
         // --- CORE VEHICLE PHYSICS ---
         class CustomRaceCar {
-            constructor(color, isAI = false, label = "") {
+            constructor(colorHex, isAI = false, label = "") {
                 this.isAI = isAI;
                 this.label = label;
+                this.colorHex = colorHex; // Saved for UI Leaderboard colors
                 this.position = new THREE.Vector3();
                 this.velocity = new THREE.Vector3();
                 this.heading = 0;
@@ -301,7 +356,6 @@
                 this.velY = 0;
                 this.isGrounded = true;
 
-                // COMPETITIVE BALANCING: Player has faster acceleration and slightly higher top speed to hunt down AI.
                 this.acceleration = isAI ? 24.0 : 36.0; 
                 this.drag = 0.92;
                 this.braking = 45.0;
@@ -309,7 +363,7 @@
                 this.maxSpeed = isAI ? 55.0 + (Math.random() * 8) : 65.0; 
 
                 this.mesh = new THREE.Group();
-                const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.2 });
+                const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.2 });
                 const trimMat = new THREE.MeshStandardMaterial({ color: 0x111, roughness: 0.8 });
 
                 const body = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.5, 5.2), bodyMat);
@@ -349,7 +403,6 @@
                 const nextPos = this.position.clone().addScaledVector(this.velocity, dt);
 
                 if (!this.isAI) {
-                    // FLAWLESS COLLISION FIX: Uses high-res cache curve array to verify boundaries. Prevents glitching on straights.
                     if (this.checkCircuitContainment(nextPos)) {
                         this.position.copy(nextPos);
                     } else {
@@ -358,7 +411,7 @@
                         this.position.addScaledVector(this.velocity, -dt * 0.4);
                     }
                 } else {
-                    this.position.copy(nextPos); // AI ignores walls
+                    this.position.copy(nextPos);
                 }
 
                 if (!this.isGrounded) {
@@ -375,7 +428,6 @@
                 this.mesh.position.y = this.posY;
                 this.mesh.rotation.y = this.heading;
 
-                // Cache prev progress to trigger EXACT line cross
                 let prevProgress = this.lapProgress;
                 this.calculateLapProgress();
                 this.evaluateObstacleIntersections();
@@ -384,7 +436,6 @@
 
             checkCircuitContainment(provisionalPos) {
                 let shortestDistSq = Infinity;
-                // Checks distance to the 600 cached curve points directly. Impossible to glitch out.
                 for (let i = 0; i < physicsCurvePoints.length; i++) {
                     const distSq = provisionalPos.distanceToSquared(physicsCurvePoints[i]);
                     if (distSq < shortestDistSq) shortestDistSq = distSq;
@@ -414,7 +465,6 @@
                 if (this.lapProgress > 0.48 && this.lapProgress < 0.60 && this.hasHitCheckpoint25) this.hasHitCheckpoint50 = true;
                 if (this.lapProgress > 0.73 && this.lapProgress < 0.85 && this.hasHitCheckpoint50) this.hasHitCheckpoint75 = true;
 
-                // EXACT FINISH LINE TRIGGER: Only executes if the tracker rolls over from 0.9x to 0.0x ensuring you physically crossed T=0.
                 if (prevProgress > 0.9 && this.lapProgress < 0.1 && this.hasHitCheckpoint75) {
                     this.lapsCompleted += 1;
                     this.hasHitCheckpoint25 = false; 
@@ -445,21 +495,19 @@
         }
 
         function spawnCustomRaceCars(playerColor) {
-            // Get proper start trajectory
             const startPt = trackCurve.getPointAt(0);
             const startTangent = trackCurve.getTangentAt(0);
             const startAngle = Math.atan2(startTangent.x, startTangent.z);
 
-            playerCar = new CustomRaceCar(playerColor, false, "Player");
-            playerCar.position.copy(startPt).addScaledVector(startTangent, -10); // Placed slightly behind line
+            playerCar = new CustomRaceCar(playerColor, false, playerNameStr);
+            playerCar.position.copy(startPt).addScaledVector(startTangent, -10); 
             playerCar.heading = startAngle;
 
-            const aiColors = [0xe28743, 0x8e44ad, 0x00ffff, 0xffaa00, 0x99ff00];
             for (let i = 0; i < 5; i++) {
-                const ai = new CustomRaceCar(aiColors[i], true, `AI_${i+1}`);
+                const aiData = aiRivals[i];
+                const ai = new CustomRaceCar(aiData.color, true, aiData.name);
                 const normal = startTangent.clone().cross(new THREE.Vector3(0,1,0)).normalize();
                 
-                // Spawn AI in a grid line backward
                 ai.position.copy(startPt)
                     .addScaledVector(startTangent, -30 - (i * 15))
                     .addScaledVector(normal, i % 2 === 0 ? 6 : -6);
@@ -529,7 +577,7 @@
             
             pack.sort((a, b) => (b.lapsCompleted + b.lapProgress) - (a.lapsCompleted + a.lapProgress));
             
-            const rank = pack.findIndex(c => c.label === "Player") + 1;
+            const rank = pack.findIndex(c => c.label === playerNameStr) + 1;
             const suffix = ["ST", "ND", "RD", "TH", "TH", "TH"][rank - 1];
             const displayRank = rank + suffix;
             
@@ -537,13 +585,36 @@
                 document.getElementById('place-display').innerText = displayRank;
                 finalPlayerRank = displayRank;
             }
+            
+            return pack; // Return sorted array for the victory screen builder
         }
 
         function triggerRaceVictoryEvent() {
             raceFinished = true;
             raceStarted = false;
             
-            document.getElementById('victory-place').innerText = `FINAL STANDING: ${finalPlayerRank} PLACE`;
+            const finalPack = computeLeaderboardPositions();
+            
+            // Generate Dynamic UI Leaderboard 
+            let lbHTML = "";
+            finalPack.forEach((car, index) => {
+                let suffix = ["ST", "ND", "RD", "TH", "TH", "TH"][index];
+                let rankStr = (index + 1) + suffix;
+                let colorHex = "#" + car.colorHex.toString(16).padStart(6, '0');
+                
+                // Highlight Player Row
+                let isPlayer = car.label === playerNameStr ? "player-row" : "";
+                let progressStr = car.lapsCompleted > 0 ? "FINISHED" : Math.floor(car.lapProgress * 100) + "%";
+
+                lbHTML += `
+                <div class="lb-row ${isPlayer}">
+                    <div class="lb-rank">${rankStr}</div>
+                    <div class="lb-name" style="color: ${colorHex};">${car.label}</div>
+                    <div class="lb-score">${progressStr}</div>
+                </div>`;
+            });
+
+            document.getElementById('final-leaderboard-container').innerHTML = lbHTML;
             document.getElementById('victory-screen').style.display = 'flex';
             document.getElementById('confetti-canvas').style.display = 'block';
             
